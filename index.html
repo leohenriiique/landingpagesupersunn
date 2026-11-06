@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SUPERSUNN Energia Solar — Simule sua economia</title>
+<meta name="description" content="Simule em 1 minuto quanto você economiza com energia solar, já com as regras da Lei 14.300. Projeto, instalação e homologação pela SUPERSUNN.">
+<meta property="og:title" content="SUPERSUNN Energia Solar — Simule sua economia">
+<meta property="og:description" content="Descubra quanto sua conta de luz pode cair com energia solar.">
+<meta name="theme-color" content="#0B1F4B">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,700;1,800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#0B1F4B; --navy-2:#143A7A; --navy-deep:#071533;
+  --orange:#FF7A00; --orange-2:#E86E00; --yellow:#FFC400;
+  --mist:#E9EDF3; --paper:#FFFFFF; --ink:#0B1F4B; --muted:#55657F; --line:#D5DCE6;
+  --green:#22C55E;
+  --r-lg:22px; --r-md:14px; --r-sm:10px;
+}
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+section{scroll-margin-top:72px;}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto;} *{animation:none!important;transition:none!important;}}
+body{margin:0;font-family:'Montserrat',system-ui,sans-serif;color:var(--ink);background:var(--paper);font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased;}
+img,svg{display:block;max-width:100%;}
+a{color:inherit;}
+:focus-visible{outline:3px solid var(--yellow);outline-offset:3px;border-radius:6px;}
+.wrap{max-width:1160px;margin:0 auto;padding:0 24px;}
+h1,h2,h3{line-height:1.12;margin:0;letter-spacing:-.02em;}
+h2{font-size:clamp(28px,3.6vw,42px);font-weight:800;}
+p{margin:0;}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;border:0;border-radius:999px;font:inherit;font-weight:700;font-size:16px;padding:16px 28px;cursor:pointer;text-decoration:none;transition:background .15s, transform .15s;}
+.btn-primary{background:var(--orange);color:#fff;}
+.btn-primary:hover{background:var(--orange-2);}
+.btn-primary:active{transform:scale(.98);}
+.btn-ghost{background:transparent;color:#fff;border:2px solid rgba(255,255,255,.45);}
+.btn-ghost:hover{border-color:#fff;}
+.btn-wa{background:#1FAF55;color:#fff;}
+.btn-wa:hover{background:#18964A;}
+
+/* ---------- header ---------- */
+.top{position:sticky;top:0;z-index:40;background:rgba(255,255,255,.94);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);}
+.top .wrap{display:flex;align-items:center;gap:28px;height:72px;}
+.top .logo{width:176px;flex:none;}
+.top nav{display:flex;gap:26px;margin-left:auto;font-size:14.5px;font-weight:600;}
+.top nav a{text-decoration:none;color:var(--muted);}
+.top nav a:hover{color:var(--navy);}
+.top .btn{padding:11px 20px;font-size:14.5px;}
+@media (max-width:860px){.top nav{display:none;} .top .btn{margin-left:auto;}}
+@media (max-width:420px){.top .logo{width:140px;} .top .btn{padding:10px 14px;font-size:13.5px;}}
+
+/* ---------- hero = simulador ---------- */
+.hero{position:relative;overflow:hidden;background:radial-gradient(120% 90% at 85% 0%, #1B3F86 0%, var(--navy) 46%, var(--navy-deep) 100%);color:#fff;padding:64px 0 150px;}
+.hero-sun{position:absolute;right:-120px;top:-110px;width:560px;opacity:.10;pointer-events:none;}
+.hero-swoosh{position:absolute;left:0;right:0;bottom:-2px;width:100%;height:150px;}
+.hero .wrap{position:relative;display:grid;grid-template-columns:1.05fr .95fr;gap:56px;align-items:center;}
+.hero h1{font-size:clamp(34px,4.2vw,54px);font-weight:900;}
+.hero .lead{font-size:18px;color:#C9D3E6;margin-top:18px;max-width:520px;}
+.sim{margin-top:30px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.18);border-radius:var(--r-lg);padding:26px;}
+.sim label,.fld>span{display:block;font-size:13.5px;font-weight:600;color:#DCE4F2;margin-bottom:8px;}
+.bill-row{display:flex;align-items:center;gap:14px;}
+.bill-input{display:flex;align-items:center;background:#fff;border-radius:var(--r-sm);padding:0 14px;height:54px;width:170px;flex:none;}
+.bill-input b{color:var(--muted);font-weight:700;margin-right:6px;}
+.bill-input input{border:0;outline:0;font:inherit;font-size:22px;font-weight:800;color:var(--navy);width:100%;background:transparent;}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:8px;border-radius:9px;background:linear-gradient(90deg,var(--yellow) 0%,var(--orange) var(--p,30%),rgba(255,255,255,.22) var(--p,30%));outline:none;}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;height:28px;border-radius:50%;background:#fff;border:6px solid var(--orange);cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.35);}
+input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:#fff;border:6px solid var(--orange);cursor:pointer;}
+.sim-grid{display:grid;grid-template-columns:1fr;gap:16px;margin-top:20px;}
+.sim select,.fld input,.fld select{width:100%;height:50px;border-radius:var(--r-sm);border:1.5px solid transparent;background:#fff;color:var(--navy);font:inherit;font-weight:600;font-size:15px;padding:0 14px;}
+.seg{display:flex;background:rgba(255,255,255,.1);border-radius:var(--r-sm);padding:4px;gap:4px;}
+.seg button{flex:1;border:0;background:transparent;color:#DCE4F2;font:inherit;font-weight:700;font-size:13.5px;padding:10px 4px;border-radius:8px;cursor:pointer;}
+.seg button[aria-pressed=true]{background:#fff;color:var(--navy);}
+.sim .btn{width:100%;margin-top:22px;}
+.sim-hint{font-size:12.5px;color:#9FB0CC;margin-top:12px;text-align:center;}
+
+/* conta de luz (elemento-assinatura) */
+.receipt{position:relative;background:#fff;color:var(--navy);border-radius:6px 6px 0 0;padding:28px 30px 36px;box-shadow:0 30px 60px rgba(0,0,0,.35);max-width:440px;margin-left:auto;transform:rotate(1.6deg);}
+.receipt::after{content:"";position:absolute;left:0;right:0;bottom:-12px;height:12px;background:radial-gradient(circle at 10px 12px, transparent 7px, #fff 7.5px) 0 0/20px 12px repeat-x;}
+.rc-head{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px dashed var(--line);padding-bottom:14px;}
+.rc-head strong{font-size:15px;font-weight:800;}
+.rc-head small{display:block;color:var(--muted);font-size:12px;}
+.rc-sym{width:46px;}
+.rc-line{display:flex;justify-content:space-between;font-size:14px;padding:9px 0;border-bottom:1px solid var(--mist);}
+.rc-line span:first-child{color:var(--muted);}
+.rc-old{margin-top:16px;display:flex;justify-content:space-between;align-items:baseline;}
+.rc-old span{font-size:14px;color:var(--muted);font-weight:600;}
+.rc-old s{font-size:26px;font-weight:800;color:#9AA6B8;text-decoration-thickness:3px;text-decoration-color:var(--orange);}
+.rc-new{margin-top:12px;background:var(--navy);color:#fff;border-radius:var(--r-md);padding:16px 18px;display:flex;justify-content:space-between;align-items:center;}
+.rc-new span{font-size:13.5px;color:#C9D3E6;font-weight:600;}
+.rc-new b{font-size:34px;font-weight:900;color:var(--yellow);font-variant-numeric:tabular-nums;}
+.rc-save{margin-top:16px;display:flex;align-items:center;gap:12px;}
+.rc-pct{flex:none;width:74px;height:74px;border-radius:50%;background:conic-gradient(var(--orange) var(--deg,0deg), var(--mist) 0);display:grid;place-items:center;}
+.rc-pct i{width:56px;height:56px;border-radius:50%;background:#fff;display:grid;place-items:center;font-style:normal;font-weight:900;font-size:17px;}
+.rc-save p{font-size:14px;color:var(--muted);}
+.rc-save p b{color:var(--navy);font-size:20px;display:block;}
+.rc-stamp{position:absolute;right:-18px;top:-18px;background:var(--yellow);color:var(--navy);font-weight:800;font-size:12.5px;padding:8px 14px;border-radius:999px;transform:rotate(6deg);box-shadow:0 6px 16px rgba(0,0,0,.25);}
+.receipt.bump{animation:bump .35s ease;}
+.rc-body{position:relative;}
+.receipt.gated .rc-mask{filter:blur(7px);user-select:none;pointer-events:none;}
+.receipt.gated .rc-stamp{display:none;}
+.rc-lock{display:none;position:absolute;inset:-6px -8px;z-index:2;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:10px;background:rgba(255,255,255,.55);border-radius:12px;padding:16px;}
+.receipt.gated .rc-lock{display:flex;}
+.rc-lock .lk{width:52px;height:52px;border-radius:50%;background:var(--navy);display:grid;place-items:center;}
+.rc-lock b{font-size:18px;font-weight:800;max-width:300px;line-height:1.3;}
+.rc-lock span{font-size:13.5px;color:var(--muted);max-width:290px;}
+.rc-lock .btn{padding:13px 22px;font-size:15px;margin-top:4px;}
+@keyframes bump{50%{transform:rotate(1.6deg) scale(1.015);}}
+@media (max-width:920px){
+  .hero{padding:40px 0 170px;}
+  .hero .wrap{grid-template-columns:1fr;gap:40px;}
+  .receipt{margin:0 auto;transform:none;}
+}
+@media (max-width:520px){.sim{padding:18px;} .sim-grid{grid-template-columns:1fr;} .bill-input{width:140px;} .receipt{padding:22px 20px 30px;} .rc-new b{font-size:28px;}}
+
+/* ---------- resultado + lead ---------- */
+.result{padding:30px 0 90px;background:#fff;}
+.result-card{display:grid;grid-template-columns:1.1fr .9fr;border-radius:var(--r-lg);overflow:hidden;box-shadow:0 20px 50px rgba(11,31,75,.12);border:1px solid var(--line);}
+.res-left{padding:40px;}
+.res-left h2{font-size:clamp(24px,2.8vw,32px);}
+.res-left .sub{color:var(--muted);margin-top:8px;}
+.res-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:26px;}
+.res-item{background:var(--mist);border-radius:var(--r-md);padding:18px;}
+.res-item small{display:block;font-size:12.5px;color:var(--muted);font-weight:600;}
+.res-item b{display:block;font-size:20px;font-weight:800;margin-top:4px;font-variant-numeric:tabular-nums;}
+.res-item.hl{background:var(--navy);color:#fff;grid-column:1/-1;}
+.res-item.hl small{color:#C9D3E6;}
+.res-item.hl b{color:var(--yellow);}
+.locked .res-item b{filter:blur(8px);user-select:none;}
+.res-note{font-size:12px;color:var(--muted);margin-top:18px;line-height:1.5;}
+.res-right{background:var(--navy);color:#fff;padding:40px;position:relative;overflow:hidden;display:flex;flex-direction:column;justify-content:center;}
+.res-right h3{font-size:24px;font-weight:800;}
+.res-right p.s{color:#C9D3E6;font-size:14.5px;margin-top:8px;}
+.lead-form{margin-top:22px;display:grid;gap:14px;}
+.fld>span{color:#DCE4F2;}
+.fld input.err{border-color:#FF6B6B;}
+.form-err{color:#FFB4B4;font-size:13px;min-height:18px;}
+.lgpd{font-size:11.5px;color:#9FB0CC;line-height:1.45;}
+.done{display:none;}
+.done.show{display:block;}
+.done h3{display:flex;align-items:center;gap:10px;}
+.done .ok{width:34px;height:34px;border-radius:50%;background:var(--green);display:grid;place-items:center;flex:none;}
+.done .btn{width:100%;margin-top:20px;}
+.done .alt{font-size:13px;color:#C9D3E6;margin-top:12px;}
+@media (max-width:880px){.result-card{grid-template-columns:1fr;} .res-left,.res-right{padding:26px;}}
+@media (max-width:520px){.res-item{padding:14px;} .res-item b{font-size:16.5px;}}
+@media (max-width:340px){.res-grid{grid-template-columns:1fr;}}
+
+/* ---------- faixa de garantias ---------- */
+.facts{background:var(--mist);padding:34px 0;}
+.facts .wrap{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;}
+.fact{display:flex;gap:14px;align-items:center;font-size:14.5px;font-weight:600;}
+.fact .ic{width:46px;height:46px;border-radius:50%;background:#fff;display:grid;place-items:center;flex:none;}
+@media (max-width:860px){.facts .wrap{grid-template-columns:1fr 1fr;}}
+@media (max-width:480px){.facts .wrap{grid-template-columns:1fr;}}
+
+/* ---------- como funciona (fluxo da energia) ---------- */
+.sec{padding:96px 0;}
+.sec-head{max-width:640px;}
+.sec-head p{color:var(--muted);font-size:17px;margin-top:14px;}
+.flow{display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin-top:52px;position:relative;}
+.flow::before{content:"";position:absolute;top:44px;left:12%;right:12%;height:4px;background:repeating-linear-gradient(90deg,var(--orange) 0 14px,transparent 14px 24px);}
+.flow-step{position:relative;text-align:center;padding:0 14px;}
+.flow-ic{width:92px;height:92px;border-radius:50%;margin:0 auto;display:grid;place-items:center;background:#fff;border:4px solid var(--navy);position:relative;z-index:1;}
+.flow-step:first-child .flow-ic{border-color:var(--orange);background:#FFF3E5;}
+.flow-step h3{font-size:18px;font-weight:800;margin-top:18px;}
+.flow-step p{font-size:14.5px;color:var(--muted);margin-top:6px;}
+@media (max-width:860px){.flow{grid-template-columns:1fr 1fr;gap:36px 0;} .flow::before{display:none;}}
+
+/* ---------- Lei 14.300 ---------- */
+.law{background:var(--navy);color:#fff;}
+.law .wrap{display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:center;}
+.law .sec-head p{color:#C9D3E6;}
+.law-points{margin-top:28px;display:grid;gap:16px;}
+.law-points div{display:flex;gap:14px;}
+.law-points b{display:block;font-size:16px;}
+.law-points span{font-size:14.5px;color:#C9D3E6;}
+.law-points .dot{width:10px;height:10px;border-radius:50%;background:var(--yellow);margin-top:8px;flex:none;}
+.fiob{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.16);border-radius:var(--r-lg);padding:30px;}
+.fiob h3{font-size:18px;font-weight:800;}
+.fiob p{font-size:13.5px;color:#C9D3E6;margin-top:6px;}
+.bars{display:flex;align-items:flex-end;gap:12px;height:220px;margin-top:24px;border-bottom:1px solid rgba(255,255,255,.25);}
+.bar{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;}
+.bar i{display:block;width:100%;border-radius:8px 8px 0 0;background:rgba(255,255,255,.22);}
+.bar.now i{background:var(--orange);}
+.bar.next i{background:var(--yellow);}
+.bar em{font-style:normal;font-size:12.5px;font-weight:700;margin-bottom:6px;}
+.bar-labels{display:flex;gap:12px;margin-top:8px;}
+.bar-labels span{flex:1;text-align:center;font-size:12px;color:#C9D3E6;}
+@media (max-width:900px){.law .wrap{grid-template-columns:1fr;gap:40px;}}
+
+/* ---------- etapas ---------- */
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;margin-top:48px;counter-reset:st;}
+.step{border:1.5px solid var(--line);border-radius:var(--r-lg);padding:26px;position:relative;}
+.step::before{counter-increment:st;content:counter(st);position:absolute;top:22px;right:24px;font-size:44px;font-weight:900;color:var(--mist);line-height:1;}
+.step h3{font-size:18px;font-weight:800;padding-right:40px;}
+.step p{font-size:14.5px;color:var(--muted);margin-top:8px;}
+.step .when{display:inline-block;margin-top:14px;font-size:13px;font-weight:700;color:var(--orange-2);background:#FFF3E5;border-radius:999px;padding:5px 12px;}
+.step:last-child{background:var(--orange);border-color:var(--orange);color:#fff;}
+.step:last-child p{color:#FFF1E0;}
+.step:last-child::before{color:rgba(255,255,255,.3);}
+.step:last-child .when{background:#fff;color:var(--orange-2);}
+@media (max-width:900px){.steps{grid-template-columns:1fr 1fr;}}
+@media (max-width:560px){.steps{grid-template-columns:1fr;}}
+
+/* ---------- benefícios ---------- */
+.why{background:var(--mist);}
+.why-grid{display:grid;grid-template-columns:1.1fr 1fr 1fr;grid-template-rows:auto auto;gap:22px;margin-top:48px;}
+.why-item{background:#fff;border-radius:var(--r-lg);padding:28px;}
+.why-item.big{grid-row:span 2;background:var(--navy);color:#fff;display:flex;flex-direction:column;justify-content:space-between;overflow:hidden;position:relative;}
+.why-item.big p{color:#C9D3E6;}
+.why-item.big .bg-sun{position:absolute;right:-60px;bottom:-60px;width:260px;opacity:.16;}
+.why-item h3{font-size:19px;font-weight:800;margin-top:16px;}
+.why-item p{font-size:14.5px;color:var(--muted);margin-top:8px;}
+.why-item .ic{width:52px;height:52px;border-radius:50%;background:#FFF3E5;display:grid;place-items:center;}
+.why-item.big .ic{background:var(--orange);}
+.why-item.big h3{font-size:26px;}
+@media (max-width:900px){.why-grid{grid-template-columns:1fr 1fr;} .why-item.big{grid-column:span 2;grid-row:auto;}}
+@media (max-width:560px){.why-grid{grid-template-columns:1fr;} .why-item.big{grid-column:auto;}}
+
+/* ---------- FAQ ---------- */
+.faq{max-width:820px;margin:44px auto 0;}
+.faq details{border-bottom:1.5px solid var(--line);}
+.faq summary{list-style:none;cursor:pointer;padding:22px 44px 22px 0;font-weight:700;font-size:17px;position:relative;}
+.faq summary::-webkit-details-marker{display:none;}
+.faq summary::after{content:"";position:absolute;right:6px;top:50%;width:14px;height:14px;margin-top:-10px;border-right:3px solid var(--orange);border-bottom:3px solid var(--orange);transform:rotate(45deg);transition:transform .2s;}
+.faq details[open] summary::after{transform:rotate(225deg);margin-top:-2px;}
+.faq details p{color:var(--muted);padding:0 0 22px;font-size:15.5px;max-width:720px;}
+
+/* ---------- CTA final + rodapé ---------- */
+.cta{position:relative;overflow:hidden;background:var(--navy);color:#fff;text-align:center;padding:96px 0 170px;}
+.cta h2{max-width:720px;margin:0 auto;}
+.cta p{color:#C9D3E6;margin:16px auto 30px;max-width:560px;font-size:17px;}
+.cta .btns{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;}
+.cta .hero-swoosh{height:130px;}
+footer{background:var(--navy-deep);color:#C9D3E6;padding:44px 0 34px;font-size:14px;}
+footer .wrap{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:30px;}
+footer .logo{width:190px;}
+footer h4{color:#fff;margin:0 0 10px;font-size:15px;}
+footer ul{list-style:none;padding:0;margin:0;display:grid;gap:6px;}
+footer a{text-decoration:none;}
+footer a:hover{color:#fff;}
+.copy{border-top:1px solid rgba(255,255,255,.12);margin-top:30px;padding-top:20px;font-size:12.5px;color:#8A9AB6;grid-column:1/-1;}
+@media (max-width:760px){footer .wrap{grid-template-columns:1fr;}}
+
+.wa-float{position:fixed;right:18px;bottom:18px;z-index:50;width:58px;height:58px;border-radius:50%;background:#1FAF55;display:grid;place-items:center;box-shadow:0 8px 22px rgba(0,0,0,.28);}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <a href="#inicio" aria-label="SUPERSUNN Energia Solar — início"><svg class="logo" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 847.90 190.00"><defs><linearGradient id="lphsun" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFD23F"/><stop offset="1" stop-color="#FFB000"/></linearGradient>
+<linearGradient id="lphbolt" x1="0.2" y1="0" x2="0.5" y2="1"><stop offset="0" stop-color="#FFB300"/><stop offset="0.55" stop-color="#FF8A00"/><stop offset="1" stop-color="#FF6A00"/></linearGradient><mask id="lphm" maskUnits="userSpaceOnUse" x="-20" y="-20" width="240" height="240">
+<rect x="-20" y="-20" width="240" height="240" fill="#fff"/>
+<path d="M126,2L76,110L104,110L66,198L148,82L118,82L168,2Z" fill="#000" stroke="#000" stroke-width="13" stroke-linejoin="round"/></mask></defs><g transform="translate(0,0)"><g transform="scale(0.95)"><g mask="url(#lphm)"><path d="M101.65,50.02L118.92,4.86L119.13,53.24ZM122.18,54.41L147.78,28.49L137.00,63.58ZM139.33,65.74L180.65,46.11L149.24,79.46ZM150.50,82.29L184.35,83.22L153.97,98.47ZM153.97,101.53L195.14,118.92L150.50,117.71ZM149.24,120.54L171.51,147.78L139.33,134.26ZM137.00,136.42L153.89,180.65L122.18,145.59ZM119.13,146.76L116.78,184.35L101.65,149.98ZM98.35,149.98L81.08,195.14L80.87,146.76ZM77.82,145.59L52.22,171.51L63.00,136.42ZM60.67,134.26L19.35,153.89L50.76,120.54ZM49.50,117.71L15.65,116.78L46.03,101.53ZM46.03,98.47L4.86,81.08L49.50,82.29ZM50.76,79.46L28.49,52.22L60.67,65.74ZM63.00,63.58L46.11,19.35L77.82,54.41ZM80.87,53.24L83.22,15.65L98.35,50.02Z" fill="url(#lphsun)"/><circle cx="100" cy="100" r="53" fill="none" stroke="url(#lphsun)" stroke-width="13"/><path d="M70.56,117.00 A34,34 0 0 1 91.20,67.16" fill="none" stroke="url(#lphsun)" stroke-width="11" stroke-linecap="round"/><path d="M133.67,95.27 A34,34 0 0 1 110.51,132.34" fill="none" stroke="url(#lphsun)" stroke-width="11" stroke-linecap="round"/></g><path d="M126,2L76,110L104,110L66,198L148,82L118,82L168,2Z" fill="url(#lphbolt)" stroke="url(#lphbolt)" stroke-width="2" stroke-linejoin="round"/></g><g transform="translate(202.0,37.36)"><path d="M27.700000000000003 73.4Q18.7 73.4 10.95 71.25Q3.2 69.1 -1.5 65.9L6.300000000000001 51.099999999999994Q11.600000000000001 54.5 17.6 56.25Q23.6 58.0 29.6 58.0Q35.300000000000004 58.0 38.45 56.35Q41.6 54.7 41.6 51.8Q41.6 49.4 39.150000000000006 48.05Q36.7 46.7 32.800000000000004 45.7Q28.900000000000002 44.7 24.550000000000004 43.45Q20.200000000000003 42.2 16.35 40.1Q12.5 38.0 10.05 34.55Q7.6000000000000005 31.099999999999994 7.6000000000000005 25.599999999999994Q7.6000000000000005 18.0 11.700000000000001 12.399999999999999Q15.8 6.799999999999997 23.35 3.6999999999999957Q30.900000000000002 0.5999999999999943 41.2 0.5999999999999943Q48.7 0.5999999999999943 55.2 2.1499999999999986Q61.7 3.700000000000003 66.4 6.599999999999994L59.2 21.299999999999997Q55.1 18.699999999999996 50.150000000000006 17.349999999999998Q45.2 16.0 40.0 16.0Q33.9 16.0 30.65 18.0Q27.400000000000002 20.0 27.400000000000002 22.799999999999997Q27.3 25.699999999999996 30.9 27.099999999999998Q34.5 28.5 39.400000000000006 29.799999999999997Q43.1 30.799999999999997 46.95 32.05Q50.800000000000004 33.3 54.10000000000001 35.3Q57.400000000000006 37.3 59.400000000000006 40.449999999999996Q61.400000000000006 43.599999999999994 61.400000000000006 48.5Q61.400000000000006 56.0 57.25 61.6Q53.1 67.2 45.55 70.30000000000001Q38.0 73.4 27.700000000000003 73.4ZM97.7 73.4Q87.2 73.4 80.1 69.35Q73.0 65.3 70.15 58.0Q67.3 50.7 69.2 40.8L77.0 2.0H96.80000000000001L89.10000000000001 40.5Q87.4 49.0 90.35000000000001 53.0Q93.30000000000001 57.0 100.1 57.0Q106.30000000000001 57.0 110.0 53.2Q113.7 49.4 115.5 40.5L123.2 2.0H142.7L134.8 41.7Q131.60000000000002 57.4 122.35000000000002 65.4Q113.10000000000001 73.4 97.7 73.4ZM139.5 72.0 153.5 2.0H183.10000000000002Q196.70000000000002 2.0 204.10000000000002 7.949999999999999Q211.5 13.899999999999999 211.5 24.5Q211.5 33.3 207.25 39.9Q203.0 46.5 195.2 50.1Q187.4 53.7 176.9 53.7H163.0L159.3 72.0ZM166.10000000000002 38.1H177.8Q184.3 38.1 187.9 35.05Q191.5 32.0 191.5 26.199999999999996Q191.5 21.799999999999997 188.60000000000002 19.699999999999996Q185.70000000000002 17.599999999999994 180.5 17.599999999999994H170.20000000000002ZM233.8 56.7H270.5L267.3 72.0H211.20000000000002L225.20000000000002 2.0H280.0L276.90000000000003 17.299999999999997H241.60000000000002L239.3 29.099999999999994H270.40000000000003L267.5 43.9H236.3ZM276.40000000000003 72.0 290.40000000000003 2.0H320.3Q333.70000000000005 2.0 341.1 7.899999999999999Q348.5 13.799999999999997 348.5 24.299999999999997Q348.5 34.0 343.35 40.95Q338.20000000000005 47.9 329.1 51.0L341.0 72.0H320.3L309.8 53.4H300.0L296.2 72.0ZM303.0 38.1H314.70000000000005Q321.20000000000005 38.1 324.85 35.05Q328.5 32.0 328.5 26.199999999999996Q328.5 21.799999999999997 325.55 19.699999999999996Q322.6 17.599999999999994 317.5 17.599999999999994H307.1Z" fill="#0B1F4B"/><path d="M376.5 73.4Q367.5 73.4 359.75 71.25Q352.0 69.1 347.3 65.9L355.1 51.099999999999994Q360.40000000000003 54.5 366.40000000000003 56.25Q372.40000000000003 58.0 378.40000000000003 58.0Q384.1 58.0 387.25 56.35Q390.40000000000003 54.7 390.40000000000003 51.8Q390.40000000000003 49.4 387.95000000000005 48.05Q385.5 46.7 381.6 45.7Q377.7 44.7 373.35 43.45Q369.0 42.2 365.15 40.1Q361.3 38.0 358.85 34.55Q356.40000000000003 31.099999999999994 356.40000000000003 25.599999999999994Q356.40000000000003 18.0 360.5 12.399999999999999Q364.6 6.799999999999997 372.15 3.6999999999999957Q379.7 0.5999999999999943 390.0 0.5999999999999943Q397.5 0.5999999999999943 404.0 2.1499999999999986Q410.5 3.700000000000003 415.20000000000005 6.599999999999994L408.0 21.299999999999997Q403.90000000000003 18.699999999999996 398.95000000000005 17.349999999999998Q394.0 16.0 388.8 16.0Q382.7 16.0 379.45 18.0Q376.2 20.0 376.2 22.799999999999997Q376.1 25.699999999999996 379.70000000000005 27.099999999999998Q383.3 28.5 388.20000000000005 29.799999999999997Q391.90000000000003 30.799999999999997 395.75 32.05Q399.6 33.3 402.90000000000003 35.3Q406.20000000000005 37.3 408.20000000000005 40.449999999999996Q410.20000000000005 43.599999999999994 410.20000000000005 48.5Q410.20000000000005 56.0 406.05000000000007 61.6Q401.90000000000003 67.2 394.35 70.30000000000001Q386.8 73.4 376.5 73.4ZM446.5 73.4Q436.0 73.4 428.9 69.35Q421.8 65.3 418.95000000000005 58.0Q416.1 50.7 418.0 40.8L425.8 2.0H445.6L437.9 40.5Q436.2 49.0 439.15 53.0Q442.1 57.0 448.9 57.0Q455.1 57.0 458.8 53.2Q462.5 49.4 464.3 40.5L472.0 2.0H491.5L483.6 41.7Q480.4 57.4 471.15 65.4Q461.9 73.4 446.5 73.4ZM488.30000000000007 72.0 502.30000000000007 2.0H518.6L541.8000000000001 40.3L549.4000000000001 2.0H568.8000000000001L554.8000000000001 72.0H538.5L515.4000000000001 33.699999999999996L507.70000000000005 72.0ZM566.9 72.0 580.9 2.0H597.1999999999999L620.4 40.3L628.0 2.0H647.4L633.4 72.0H617.0999999999999L594.0 33.699999999999996L586.3 72.0Z" fill="#FF7A00"/><path d="M150.90150000000006 114.0V96.15H164.39100000000005V99.465H155.00700000000006V103.34100000000001H163.29450000000006V106.554H155.00700000000006V110.685H164.72250000000005V114.0ZM178.72200000000007 114.0V96.15H182.13900000000007L191.01300000000006 107.013V96.15H195.09300000000007V114.0H191.70150000000007L182.80200000000005 103.137V114.0ZM210.03600000000006 114.0V96.15H223.52550000000005V99.465H214.14150000000006V103.34100000000001H222.42900000000006V106.554H214.14150000000006V110.685H223.85700000000006V114.0ZM237.85650000000004 114.0V96.15H245.48100000000005Q249.20400000000004 96.15 251.26950000000005 97.884Q253.33500000000004 99.618 253.33500000000004 102.627Q253.33500000000004 104.616 252.37875000000003 106.05675Q251.42250000000004 107.4975 249.68850000000003 108.2625L253.66650000000004 114.0H249.22950000000003L245.78700000000003 109.0275Q245.68500000000003 109.0275 245.58300000000003 109.0275H241.98750000000004V114.0ZM241.98750000000004 105.738H245.35350000000003Q247.24050000000003 105.738 248.19675000000004 104.90925Q249.15300000000005 104.0805 249.15300000000005 102.627Q249.15300000000005 101.148 248.19675000000004 100.332Q247.24050000000003 99.516 245.35350000000003 99.516H241.98750000000004ZM275.92800000000005 114.306Q273.8115 114.306 272.03925000000004 113.6175Q270.26700000000005 112.929 268.95375 111.69225Q267.64050000000003 110.4555 266.91375000000005 108.77250000000001Q266.18700000000007 107.0895 266.18700000000007 105.075Q266.18700000000007 103.0605 266.91375000000005 101.3775Q267.64050000000003 99.6945 268.96650000000005 98.45775Q270.2925000000001 97.221 272.0775000000001 96.5325Q273.86250000000007 95.844 276.00450000000006 95.844Q278.35050000000007 95.844 280.26300000000003 96.6345Q282.17550000000006 97.425 283.47600000000006 98.9295L280.82400000000007 101.3775Q278.91150000000005 99.363 276.2085000000001 99.363Q274.47450000000003 99.363 273.16125000000005 100.077Q271.84800000000007 100.791 271.10850000000005 102.07875Q270.369 103.3665 270.369 105.075Q270.369 106.7325 271.10850000000005 108.033Q271.84800000000007 109.3335 273.14850000000007 110.06025Q274.44900000000007 110.787 276.1575 110.787Q276.999 110.787 277.8022500000001 110.62125Q278.60550000000006 110.4555 279.37050000000005 110.0475V104.7945H283.14450000000005V112.0365Q281.66550000000007 113.1585 279.75300000000004 113.73225Q277.8405000000001 114.306 275.92800000000005 114.306ZM297.6795 114.0V96.15H301.81050000000005V114.0ZM314.4075000000001 114.0 322.36350000000004 96.15H326.4435000000001L334.42500000000007 114.0H330.09000000000003L328.50900000000007 110.175H320.22150000000005L318.64050000000003 114.0ZM321.52200000000005 107.0385H327.2085000000001L324.37800000000004 100.23ZM370.788 114.306Q368.646 114.306 366.6825 113.73225Q364.71900000000005 113.1585 363.5205 112.2405L364.923 109.12950000000001Q366.045 109.9455 367.62600000000003 110.46825Q369.20700000000005 110.991 370.81350000000003 110.991Q372.64950000000005 110.991 373.45275000000004 110.4555Q374.25600000000003 109.92 374.25600000000003 109.0785Q374.25600000000003 108.3645 373.69500000000005 107.94375Q373.134 107.523 372.20325 107.25524999999999Q371.27250000000004 106.9875 370.17600000000004 106.74525Q369.07950000000005 106.503 367.9702500000001 106.15875Q366.86100000000005 105.8145 365.93025 105.24074999999999Q364.9995 104.667 364.43850000000003 103.73625Q363.87750000000005 102.8055 363.87750000000005 101.403Q363.87750000000005 99.873 364.70625000000007 98.61075Q365.535 97.3485 367.20525000000004 96.59625Q368.87550000000005 95.844 371.40000000000003 95.844Q373.083 95.844 374.71500000000003 96.252Q376.34700000000004 96.66 377.59650000000005 97.425L376.3215 100.5615Q375.072 99.8475 373.80975 99.50325000000001Q372.5475 99.159 371.3745 99.159Q369.5385 99.159 368.76075000000003 99.75825Q367.983 100.3575 367.983 101.199Q367.983 101.8875 368.544 102.30825Q369.105 102.729 370.023 102.99674999999999Q370.94100000000003 103.2645 372.05025 103.494Q373.15950000000004 103.7235 374.26875000000007 104.06775Q375.37800000000004 104.412 376.30875000000003 104.97300000000001Q377.2395 105.534 377.80050000000006 106.452Q378.36150000000004 107.37 378.36150000000004 108.7725Q378.36150000000004 110.277 377.53275 111.5265Q376.704 112.776 375.021 113.541Q373.338 114.306 370.788 114.306ZM400.5465000000001 114.306Q398.43000000000006 114.306 396.6577500000001 113.6175Q394.8855000000001 112.929 393.55950000000007 111.6795Q392.23350000000005 110.43 391.50675000000007 108.747Q390.7800000000001 107.064 390.7800000000001 105.075Q390.7800000000001 103.086 391.50675000000007 101.40299999999999Q392.23350000000005 99.72 393.55950000000007 98.4705Q394.8855000000001 97.221 396.6577500000001 96.5325Q398.43000000000006 95.844 400.5465000000001 95.844Q402.66300000000007 95.844 404.4352500000001 96.5325Q406.2075000000001 97.221 407.5335000000001 98.45775Q408.8595000000001 99.6945 409.58625000000006 101.39025000000001Q410.31300000000005 103.086 410.31300000000005 105.075Q410.31300000000005 107.064 409.58625000000006 108.75975Q408.8595000000001 110.4555 407.5335000000001 111.69225Q406.2075000000001 112.929 404.4352500000001 113.6175Q402.66300000000007 114.306 400.5465000000001 114.306ZM400.5465000000001 110.787Q402.12750000000005 110.787 403.38975000000005 110.06025Q404.65200000000004 109.3335 405.39150000000006 108.04575Q406.1310000000001 106.758 406.1310000000001 105.075Q406.1310000000001 103.392 405.39150000000006 102.10425000000001Q404.65200000000004 100.8165 403.38975000000005 100.08975000000001Q402.12750000000005 99.363 400.5465000000001 99.363Q398.9655000000001 99.363 397.7032500000001 100.08975000000001Q396.4410000000001 100.8165 395.70150000000007 102.10425000000001Q394.96200000000005 103.392 394.96200000000005 105.075Q394.96200000000005 106.758 395.70150000000007 108.04575Q396.4410000000001 109.3335 397.7032500000001 110.06025Q398.9655000000001 110.787 400.5465000000001 110.787ZM424.134 114.0V96.15H428.26500000000004V110.634H437.2155V114.0ZM447.90000000000003 114.0 455.856 96.15H459.93600000000004L467.9175 114.0H463.5825L462.0015 110.175H453.714L452.133 114.0ZM455.0145 107.0385H460.701L457.8705 100.23ZM480.48900000000003 114.0V96.15H488.11350000000004Q491.83650000000006 96.15 493.90200000000004 97.884Q495.9675000000001 99.618 495.9675000000001 102.627Q495.9675000000001 104.616 495.0112500000001 106.05675Q494.05500000000006 107.4975 492.3210000000001 108.2625L496.29900000000004 114.0H491.8620000000001L488.4195000000001 109.0275Q488.31750000000005 109.0275 488.2155000000001 109.0275H484.62000000000006V114.0ZM484.62000000000006 105.738H487.98600000000005Q489.87300000000005 105.738 490.82925000000006 104.90925Q491.78550000000007 104.0805 491.78550000000007 102.627Q491.78550000000007 101.148 490.82925000000006 100.332Q489.87300000000005 99.516 487.98600000000005 99.516H484.62000000000006Z" fill="#0B1F4B"/><rect x="53.43" y="102.53" width="77.51" height="5.10" rx="2.55" fill="#FF7A00"/><rect x="514.97" y="102.53" width="77.51" height="5.10" rx="2.55" fill="#FF7A00"/></g></g></svg></a>
+    <nav aria-label="Seções">
+      <a href="#simulador">Simulador</a>
+      <a href="#como-funciona">Como funciona</a>
+      <a href="#lei-14300">Lei 14.300</a>
+      <a href="#duvidas">Dúvidas</a>
+    </nav>
+    <a class="btn btn-primary" href="#simulador">Simular economia</a>
+  </div>
+</header>
+
+<main id="inicio">
+
+<!-- HERO / SIMULADOR -->
+<section class="hero" id="simulador" aria-labelledby="h-hero">
+  <div class="hero-sun" aria-hidden="true"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200.00 200.00"><defs><linearGradient id="lpssun" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFD23F"/><stop offset="1" stop-color="#FFB000"/></linearGradient>
+<linearGradient id="lpsbolt" x1="0.2" y1="0" x2="0.5" y2="1"><stop offset="0" stop-color="#FFB300"/><stop offset="0.55" stop-color="#FF8A00"/><stop offset="1" stop-color="#FF6A00"/></linearGradient><mask id="lpsm" maskUnits="userSpaceOnUse" x="-20" y="-20" width="240" height="240">
+<rect x="-20" y="-20" width="240" height="240" fill="#fff"/>
+<path d="M126,2L76,110L104,110L66,198L148,82L118,82L168,2Z" fill="#000" stroke="#000" stroke-width="13" stroke-linejoin="round"/></mask></defs><g transform="translate(0,0)"><g mask="url(#lpsm)"><path d="M101.65,50.02L118.92,4.86L119.13,53.24ZM122.18,54.41L147.78,28.49L137.00,63.58ZM139.33,65.74L180.65,46.11L149.24,79.46ZM150.50,82.29L184.35,83.22L153.97,98.47ZM153.97,101.53L195.14,118.92L150.50,117.71ZM149.24,120.54L171.51,147.78L139.33,134.26ZM137.00,136.42L153.89,180.65L122.18,145.59ZM119.13,146.76L116.78,184.35L101.65,149.98ZM98.35,149.98L81.08,195.14L80.87,146.76ZM77.82,145.59L52.22,171.51L63.00,136.42ZM60.67,134.26L19.35,153.89L50.76,120.54ZM49.50,117.71L15.65,116.78L46.03,101.53ZM46.03,98.47L4.86,81.08L49.50,82.29ZM50.76,79.46L28.49,52.22L60.67,65.74ZM63.00,63.58L46.11,19.35L77.82,54.41ZM80.87,53.24L83.22,15.65L98.35,50.02Z" fill="url(#lpssun)"/><circle cx="100" cy="100" r="53" fill="none" stroke="url(#lpssun)" stroke-width="13"/><path d="M70.56,117.00 A34,34 0 0 1 91.20,67.16" fill="none" stroke="url(#lpssun)" stroke-width="11" stroke-linecap="round"/><path d="M133.67,95.27 A34,34 0 0 1 110.51,132.34" fill="none" stroke="url(#lpssun)" stroke-width="11" stroke-linecap="round"/></g><path d="M126,2L76,110L104,110L66,198L148,82L118,82L168,2Z" fill="url(#lpsbolt)" stroke="url(#lpsbolt)" stroke-width="2" stroke-linejoin="round"/></g></svg></div>
+  <div class="wrap">
+    <div>
+      <h1 id="h-hero">Gere sua própria energia e pague só o mínimo na conta de luz.</h1>
+      <p class="lead">Informe o valor da sua conta e alguns dados do imóvel para descobrir quanto sua conta pode cair com energia solar. O cálculo já considera as regras da Lei 14.300.</p>
+
+      <form class="sim" id="simForm" novalidate>
+        <label for="billRange">Quanto vem sua conta de luz por mês?</label>
+        <div class="bill-row">
+          <div class="bill-input"><b>R$</b><input id="billNum" inputmode="numeric" aria-label="Valor da conta em reais" value="450"></div>
+          <input type="range" id="billRange" min="100" max="3000" step="10" value="450" aria-label="Valor da conta">
+        </div>
+        <div class="sim-grid">
+          <div>
+            <label for="uf">Estado</label>
+            <select id="uf"></select>
+          </div>
+          <div>
+            <span id="lb-tipo" class="sr">Tipo de imóvel</span>
+            <label aria-hidden="true">Tipo de imóvel</label>
+            <div class="seg" role="group" aria-labelledby="lb-tipo" data-field="tipo">
+              <button type="button" data-v="casa" aria-pressed="true">Casa</button>
+              <button type="button" data-v="comercio" aria-pressed="false">Comércio</button>
+              <button type="button" data-v="rural" aria-pressed="false">Rural</button>
+              <button type="button" data-v="industria" aria-pressed="false">Indústria</button>
+            </div>
+          </div>
+          <div style="grid-column:1/-1">
+            <span id="lb-lig" class="sr">Tipo de ligação</span>
+            <label aria-hidden="true">Tipo de ligação (está na conta de luz)</label>
+            <div class="seg" role="group" aria-labelledby="lb-lig" data-field="ligacao">
+              <button type="button" data-v="mono" aria-pressed="false">Monofásica</button>
+              <button type="button" data-v="bi" aria-pressed="true">Bifásica</button>
+              <button type="button" data-v="tri" aria-pressed="false">Trifásica</button>
+              <button type="button" data-v="bi" data-unsure="1" aria-pressed="false">Não sei</button>
+            </div>
+          </div>
+        </div>
+        <button class="btn btn-primary" type="submit">Ver minha economia</button>
+        <p class="sim-hint">Leva menos de 1 minuto. Sem compromisso.</p>
+      </form>
+    </div>
+
+    <div aria-live="polite">
+      <div class="receipt gated" id="receipt">
+        <div class="rc-stamp" id="rcStamp">−0%</div>
+        <div class="rc-head">
+          <div><strong>Sua conta de luz</strong><small>estimativa mensal, 1º ano</small></div>
+          <div class="rc-sym" aria-hidden="true"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200.00 200.00"><defs><linearGradient id="lptsun" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFD23F"/><stop offset="1" stop-color="#FFB000"/></linearGradient>
+<linearGradient id="lptbolt" x1="0.2" y1="0" x2="0.5" y2="1"><stop offset="0" stop-color="#FFB300"/><stop offset="0.55" stop-color="#FF8A00"/><stop offset="1" stop-color="#FF6A00"/></linearGradient><mask id="lptm" maskUnits="userSpaceOnUse" x="-20" y="-20" width="240" height="240">
+<rect x="-20" y="-20" width="240" height="240" fill="#fff"/>
+<path d="M126,2L76,110L104,110L66,198L148,82L118,82L168,2Z" fill="#000" stroke="#000" stroke-width="13" stroke-linejoin="round"/></mask></defs><g transform="translate(0,0)"><g mask="url(#lptm)"><path d="M101.65,50.02L118.92,4.86L119.13,53.24ZM122.18,54.41L147.78,28.49L137.00,63.58ZM139.33,65.74L180.65,46.11L149.24,79.46ZM150.50,82.29L184.35,83.22L153.97,98.47ZM153.97,101.53L195.14,118.92L150.50,117.71ZM149.24,120.54L171.51,147.78L139.33,134.26ZM137.00,136.42L153.89,180.65L122.18,145.59ZM119.13,146.76L116.78,184.35L101.65,149.98ZM98.35,149.98L81.08,195.14L80.87,146.76ZM77.82,145.59L52.22,171.51L63.00,136.42ZM60.67,134.26L19.35,153.89L50.76,120.54ZM49.50,117.71L15.65,116.78L46.03,101.53ZM46.03,98.47L4.86,81.08L49.50,82.29ZM50.76,79.46L28.49,52.22L60.67,65.74ZM63.00,63.58L46.11,19.35L77.82,54.41ZM80.87,53.24L83.22,15.65L98.35,50.02Z" fill="url(#lptsun)"/><circle cx="100" cy="100" r="53" fill="none" stroke="url(#lptsun)" stroke-width="13"/><path d="M70.56,117.00 A34,34 0 0 1 91.20,67.16" fill="none" stroke="url(#lptsun)" stroke-width="11" stroke-linecap="round"/><path d="M133.67,95.27 A34,34 0 0 1 110.51,132.34" fill="none" stroke="url(#lptsun)" stroke-width="11" stroke-linecap="round"/></g><path d="M126,2L76,110L104,110L66,198L148,82L118,82L168,2Z" fill="url(#lptbolt)" stroke="url(#lptbolt)" stroke-width="2" stroke-linejoin="round"/></g></svg></div>
+        </div>
+        <div class="rc-body">
+        <div class="rc-lock" id="rcLock"><span class="lk"><svg aria-hidden="true"  fill="#fff" stroke-width="0" viewBox="0 0 448 512" height="22" width="22" xmlns="http://www.w3.org/2000/svg"><path d="M400 224h-24v-72C376 68.2 307.8 0 224 0S72 68.2 72 152v72H48c-26.5 0-48 21.5-48 48v192c0 26.5 21.5 48 48 48h352c26.5 0 48-21.5 48-48V272c0-26.5-21.5-48-48-48zm-104 0H152v-72c0-39.7 32.3-72 72-72s72 32.3 72 72v72z"></path></svg></span><b>Sua simulação está pronta</b><span>Informe seu nome e WhatsApp para ver quanto sua conta de luz pode cair.</span><button type="button" class="btn btn-primary" id="rcUnlockBtn">Liberar minha simulação</button></div>
+        <div class="rc-mask">
+        <div class="rc-line"><span>Consumo estimado</span><b id="rcKwh">—</b></div>
+        <div class="rc-line"><span>Sistema sugerido</span><b id="rcKwp">—</b></div>
+        <div class="rc-old"><span>Hoje você paga</span><s id="rcOld">R$ 0</s></div>
+        <div class="rc-new"><span>Com energia solar</span><b id="rcNew">R$ 0</b></div>
+        <div class="rc-save">
+          <div class="rc-pct" id="rcPct"><i id="rcPctTxt">0%</i></div>
+          <p>Você deixa de pagar cerca de <b id="rcSave">R$ 0 por mês</b></p>
+        </div>
+        </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <svg class="hero-swoosh" viewBox="0 0 1440 150" preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id="sw1" x1="0" x2="1"><stop offset="0" stop-color="#FFC400"/><stop offset="1" stop-color="#FF7A00"/></linearGradient></defs><path d="M0 120 C420 108 960 70 1440 0 L1440 22 C980 92 440 132 0 140 Z" fill="#FFC400"/><path d="M0 150 L0 146 C480 136 1000 92 1440 34 L1440 150 Z" fill="#fff"/></svg>
+</section>
+
+<!-- RESULTADO + LEAD -->
+<section class="result" id="resultado" aria-labelledby="h-res">
+  <div class="wrap">
+    <div class="result-card">
+      <div class="res-left locked" id="resLeft">
+        <h2 id="h-res">Sua simulação</h2>
+        <p class="sub" id="resSub">Preencha seus dados para liberar sua simulação. Os valores aparecem na hora.</p>
+        <div class="res-grid">
+          <div class="res-item hl"><small>Economia mensal estimada</small><b id="rEco">—</b></div>
+          <div class="res-item"><small>Redução na conta</small><b id="rPct">—</b></div>
+          <div class="res-item"><small>Sistema recomendado</small><b id="rSys">—</b></div>
+          <div class="res-item"><small>Área de telhado</small><b id="rArea">—</b></div>
+          <div class="res-item"><small>Retorno do investimento</small><b id="rPay">—</b></div>
+          <div class="res-item"><small>Economia em 25 anos</small><b id="r25">—</b></div>
+          <div class="res-item"><small>Geração mensal</small><b id="rGer">—</b></div>
+        </div>
+        <p class="res-note" id="resNote">Estimativa com base na irradiação média do estado, tarifa de R$ 1,21/kWh com reajuste de 6% ao ano, iluminação pública de R$ 50,00 e cobrança do Fio B da Lei 14.300. O valor final depende da visita técnica.</p>
+      </div>
+      <div class="res-right">
+        <div id="leadBox">
+          <h3>Libere sua simulação</h3>
+          <p class="s">Veja sua economia, o sistema ideal e em quanto tempo ele se paga. Um consultor da SUPERSUNN pode conferir os números com você depois.</p>
+          <form class="lead-form" id="leadForm" novalidate>
+            <label class="fld"><span>Nome</span><input name="nome" autocomplete="name" required></label>
+            <label class="fld"><span>WhatsApp</span><input name="whatsapp" inputmode="tel" autocomplete="tel" placeholder="(00) 00000-0000" required></label>
+            <label class="fld"><span>Cidade</span><input name="cidade" autocomplete="address-level2" required></label>
+            <label class="fld"><span>E-mail (opcional)</span><input name="email" type="email" autocomplete="email"></label>
+            <div class="form-err" id="formErr" role="alert"></div>
+            <button class="btn btn-primary" type="submit">Liberar minha simulação</button>
+            <p class="lgpd">Usamos seus dados só para falar sobre o seu projeto de energia solar. Você pode pedir a exclusão a qualquer momento.</p>
+          </form>
+        </div>
+        <div class="done" id="doneBox" aria-live="polite">
+          <h3><span class="ok"><svg aria-hidden="true"  fill="#fff" stroke-width="0" viewBox="0 0 512 512" height="16" width="16" xmlns="http://www.w3.org/2000/svg"><path d="M173.898 439.404l-166.4-166.4c-9.997-9.997-9.997-26.206 0-36.204l36.203-36.204c9.997-9.998 26.207-9.998 36.204 0L192 312.69 432.095 72.596c9.997-9.997 26.207-9.997 36.204 0l36.203 36.204c9.997 9.997 9.997 26.206 0 36.204l-294.4 294.401c-9.998 9.997-26.207 9.997-36.204-.001z"></path></svg></span>Simulação liberada</h3>
+          <p class="s" id="doneTxt">Agora é só enviar para um consultor e receber sua proposta.</p>
+          <a class="btn btn-wa" id="waBtn" href="#" target="_blank" rel="noopener"><svg aria-hidden="true"  fill="#fff" stroke-width="0" viewBox="0 0 448 512" height="20" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M380.9 97.1C339 55.1 283.2 32 223.9 32c-122.4 0-222 99.6-222 222 0 39.1 10.2 77.3 29.6 111L0 480l117.7-30.9c32.4 17.7 68.9 27 106.1 27h.1c122.3 0 224.1-99.6 224.1-222 0-59.3-25.2-115-67.1-157zm-157 341.6c-33.2 0-65.7-8.9-94-25.7l-6.7-4-69.8 18.3L72 359.2l-4.4-7c-18.5-29.4-28.2-63.3-28.2-98.2 0-101.7 82.8-184.5 184.6-184.5 49.3 0 95.6 19.2 130.4 54.1 34.8 34.9 56.2 81.2 56.1 130.5 0 101.8-84.9 184.6-186.6 184.6zm101.2-138.2c-5.5-2.8-32.8-16.2-37.9-18-5.1-1.9-8.8-2.8-12.5 2.8-3.7 5.6-14.3 18-17.6 21.8-3.2 3.7-6.5 4.2-12 1.4-32.6-16.3-54-29.1-75.5-66-5.7-9.8 5.7-9.1 16.3-30.3 1.8-3.7.9-6.9-.5-9.7-1.4-2.8-12.5-30.1-17.1-41.2-4.5-10.8-9.1-9.3-12.5-9.5-3.2-.2-6.9-.2-10.6-.2-3.7 0-9.7 1.4-14.8 6.9-5.1 5.6-19.4 19-19.4 46.3 0 27.3 19.9 53.7 22.6 57.4 2.8 3.7 39.1 59.7 94.8 83.8 35.2 15.2 49 16.5 66.6 13.9 10.7-1.6 32.8-13.4 37.4-26.4 4.6-13 4.6-24.1 3.2-26.4-1.3-2.5-5-3.9-10.5-6.6z"></path></svg> Enviar no WhatsApp</a>
+          <p class="alt" id="waAlt"></p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- GARANTIAS -->
+<section class="facts" aria-label="O que está incluso">
+  <div class="wrap">
+    <div class="fact"><span class="ic"><svg aria-hidden="true"  fill="#FF7A00" stroke-width="0" viewBox="0 0 576 512" height="20" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M218.17 424.14c-2.95-5.92-8.09-6.52-10.17-6.52s-7.22.59-10.02 6.19l-7.67 15.34c-6.37 12.78-25.03 11.37-29.48-2.09L144 386.59l-10.61 31.88c-5.89 17.66-22.38 29.53-41 29.53H80c-8.84 0-16-7.16-16-16s7.16-16 16-16h12.39c4.83 0 9.11-3.08 10.64-7.66l18.19-54.64c3.3-9.81 12.44-16.41 22.78-16.41s19.48 6.59 22.77 16.41l13.88 41.64c19.75-16.19 54.06-9.7 66 14.16 1.89 3.78 5.49 5.95 9.36 6.26v-82.12l128-127.09V160H248c-13.2 0-24-10.8-24-24V0H24C10.7 0 0 10.7 0 24v464c0 13.3 10.7 24 24 24h336c13.3 0 24-10.7 24-24v-40l-128-.11c-16.12-.31-30.58-9.28-37.83-23.75zM384 121.9c0-6.3-2.5-12.4-7-16.9L279.1 7c-4.5-4.5-10.6-7-17-7H256v128h128v-6.1zm-96 225.06V416h68.99l161.68-162.78-67.88-67.88L288 346.96zm280.54-179.63l-31.87-31.87c-9.94-9.94-26.07-9.94-36.01 0l-27.25 27.25 67.88 67.88 27.25-27.25c9.95-9.94 9.95-26.07 0-36.01z"></path></svg></span>Projeto e homologação na distribuidora inclusos</div>
+    <div class="fact"><span class="ic"><svg aria-hidden="true"  fill="#FF7A00" stroke-width="0" viewBox="0 0 512 512" height="20" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M466.5 83.7l-192-80a48.15 48.15 0 0 0-36.9 0l-192 80C27.7 91.1 16 108.6 16 128c0 198.5 114.5 335.7 221.5 380.3 11.8 4.9 25.1 4.9 36.9 0C360.1 472.6 496 349.3 496 128c0-19.4-11.7-36.9-29.5-44.3zM256.1 446.3l-.1-381 175.9 73.3c-3.3 151.4-82.1 261.1-175.8 307.7z"></path></svg></span>Módulos com garantia de performance de até 25 anos</div>
+    <div class="fact"><span class="ic"><svg aria-hidden="true"  fill="#FF7A00" stroke-width="0" viewBox="0 0 320 512" height="20" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M272 0H48C21.5 0 0 21.5 0 48v416c0 26.5 21.5 48 48 48h224c26.5 0 48-21.5 48-48V48c0-26.5-21.5-48-48-48zM160 480c-17.7 0-32-14.3-32-32s14.3-32 32-32 32 14.3 32 32-14.3 32-32 32zm112-108c0 6.6-5.4 12-12 12H60c-6.6 0-12-5.4-12-12V60c0-6.6 5.4-12 12-12h200c6.6 0 12 5.4 12 12v312z"></path></svg></span>Geração acompanhada pelo celular</div>
+    <div class="fact"><span class="ic"><svg aria-hidden="true"  fill="#FF7A00" stroke-width="0" viewBox="0 0 512 512" height="20" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M496 128v16a8 8 0 0 1-8 8h-24v12c0 6.627-5.373 12-12 12H60c-6.627 0-12-5.373-12-12v-12H24a8 8 0 0 1-8-8v-16a8 8 0 0 1 4.941-7.392l232-88a7.996 7.996 0 0 1 6.118 0l232 88A8 8 0 0 1 496 128zm-24 304H40c-13.255 0-24 10.745-24 24v16a8 8 0 0 0 8 8h464a8 8 0 0 0 8-8v-16c0-13.255-10.745-24-24-24zM96 192v192H60c-6.627 0-12 5.373-12 12v20h416v-20c0-6.627-5.373-12-12-12h-36V192h-64v192h-64V192h-64v192h-64V192H96z"></path></svg></span>Financiamento com parcela perto da economia</div>
+  </div>
+</section>
+
+<!-- COMO FUNCIONA -->
+<section class="sec" id="como-funciona" aria-labelledby="h-como">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2 id="h-como">Como a energia do sol vira desconto na sua conta</h2>
+      <p>Você continua ligado à rede da distribuidora. A diferença é que boa parte da energia passa a ser gerada no seu telhado.</p>
+    </div>
+    <div class="flow">
+      <div class="flow-step"><div class="flow-ic"><svg aria-hidden="true"  fill="#FF7A00" stroke-width="0" viewBox="0 0 512 512" height="38" width="38" xmlns="http://www.w3.org/2000/svg"><path d="M256 160c-52.9 0-96 43.1-96 96s43.1 96 96 96 96-43.1 96-96-43.1-96-96-96zm246.4 80.5l-94.7-47.3 33.5-100.4c4.5-13.6-8.4-26.5-21.9-21.9l-100.4 33.5-47.4-94.8c-6.4-12.8-24.6-12.8-31 0l-47.3 94.7L92.7 70.8c-13.6-4.5-26.5 8.4-21.9 21.9l33.5 100.4-94.7 47.4c-12.8 6.4-12.8 24.6 0 31l94.7 47.3-33.5 100.5c-4.5 13.6 8.4 26.5 21.9 21.9l100.4-33.5 47.3 94.7c6.4 12.8 24.6 12.8 31 0l47.3-94.7 100.4 33.5c13.6 4.5 26.5-8.4 21.9-21.9l-33.5-100.4 94.7-47.3c13-6.5 13-24.7.2-31.1zm-155.9 106c-49.9 49.9-131.1 49.9-181 0-49.9-49.9-49.9-131.1 0-181 49.9-49.9 131.1-49.9 181 0 49.9 49.9 49.9 131.1 0 181z"></path></svg></div><h3>O sol bate nos módulos</h3><p>As placas no telhado transformam a luz do sol em energia elétrica.</p></div>
+      <div class="flow-step"><div class="flow-ic"><svg aria-hidden="true"  fill="#0B1F4B" stroke-width="0" viewBox="0 0 320 512" height="34" width="34" xmlns="http://www.w3.org/2000/svg"><path d="M296 160H180.6l42.6-129.8C227.2 15 215.7 0 200 0H56C44 0 33.8 8.9 32.2 20.8l-32 240C-1.7 275.2 9.5 288 24 288h118.7L96.6 482.5c-3.6 15.2 8 29.5 23.3 29.5 8.4 0 16.4-4.4 20.8-12l176-304c9.3-15.9-2.2-36-20.7-36z"></path></svg></div><h3>O inversor converte</h3><p>A energia é ajustada para a mesma usada nas tomadas da sua casa.</p></div>
+      <div class="flow-step"><div class="flow-ic"><svg aria-hidden="true"  fill="#0B1F4B" stroke-width="0" viewBox="0 0 576 512" height="34" width="34" xmlns="http://www.w3.org/2000/svg"><path d="M280.37 148.26L96 300.11V464a16 16 0 0 0 16 16l112.06-.29a16 16 0 0 0 15.92-16V368a16 16 0 0 1 16-16h64a16 16 0 0 1 16 16v95.64a16 16 0 0 0 16 16.05L464 480a16 16 0 0 0 16-16V300L295.67 148.26a12.19 12.19 0 0 0-15.3 0zM571.6 251.47L488 182.56V44.05a12 12 0 0 0-12-12h-56a12 12 0 0 0-12 12v72.61L318.47 43a48 48 0 0 0-61 0L4.34 251.47a12 12 0 0 0-1.6 16.9l25.5 31A12 12 0 0 0 45.15 301l235.22-193.74a12.19 12.19 0 0 1 15.3 0L530.9 301a12 12 0 0 0 16.9-1.6l25.5-31a12 12 0 0 0-1.7-16.93z"></path></svg></div><h3>Você usa na hora</h3><p>Durante o dia, seus aparelhos funcionam com a energia que você mesmo gera.</p></div>
+      <div class="flow-step"><div class="flow-ic"><svg aria-hidden="true"  fill="#0B1F4B" stroke-width="0" viewBox="0 0 384 512" height="34" width="34" xmlns="http://www.w3.org/2000/svg"><path d="M320,32a32,32,0,0,0-64,0v96h64Zm48,128H16A16,16,0,0,0,0,176v32a16,16,0,0,0,16,16H32v32A160.07,160.07,0,0,0,160,412.8V512h64V412.8A160.07,160.07,0,0,0,352,256V224h16a16,16,0,0,0,16-16V176A16,16,0,0,0,368,160ZM128,32a32,32,0,0,0-64,0v96h64Z"></path></svg></div><h3>A sobra vira crédito</h3><p>O que sobra vai para a rede e abate a energia que você usa à noite e nos meses seguintes.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- LEI 14.300 -->
+<section class="sec law" id="lei-14300" aria-labelledby="h-lei">
+  <div class="wrap">
+    <div>
+      <div class="sec-head">
+        <h2 id="h-lei">Ainda vale a pena com a Lei 14.300? Vale, e a gente mostra a conta.</h2>
+        <p>Desde 2023, quem instala energia solar paga uma parte do uso da rede, o chamado Fio B, sobre a energia que fica de crédito. Essa parte sobe aos poucos até 2029.</p>
+      </div>
+      <div class="law-points">
+        <div><i class="dot"></i><p><b>O Fio B incide só sobre a energia compensada</b><span>A energia que você usa no momento em que gera não paga essa taxa.</span></p></div>
+        <div><i class="dot"></i><p><b>Não existe cobrança em dobro</b><span>Você paga o maior valor entre a taxa mínima da distribuidora e o consumo da rede com o Fio B, nunca os dois somados.</span></p></div>
+        <div><i class="dot"></i><p><b>Nosso simulador já faz essa conta</b><span>Todos os valores desta página consideram o Fio B ano a ano e o reajuste da tarifa.</span></p></div>
+      </div>
+    </div>
+    <div class="fiob" aria-label="Percentual do Fio B cobrado por ano">
+      <h3>Quanto do Fio B é cobrado sobre a energia compensada</h3>
+      <p>Percentual definido no art. 27 da Lei 14.300/2022</p>
+      <div class="bars" id="bars"></div>
+      <div class="bar-labels" id="barLabels"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ETAPAS -->
+<section class="sec" id="etapas" aria-labelledby="h-etapas">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2 id="h-etapas">Do orçamento à conta mais leve</h2>
+      <p>A SUPERSUNN cuida de cada etapa e avisa você sobre o andamento do início ao fim.</p>
+    </div>
+    <div class="steps">
+      <div class="step"><h3>Simulação e proposta</h3><p>Analisamos sua conta de luz e enviamos a proposta com a economia detalhada.</p><span class="when">Em até 24 horas</span></div>
+      <div class="step"><h3>Visita técnica e projeto</h3><p>Vistoria do telhado, projeto elétrico e emissão da ART.</p><span class="when">Cerca de 5 dias</span></div>
+      <div class="step"><h3>Aprovação na distribuidora</h3><p>Fazemos todo o pedido de conexão e acompanhamos o parecer.</p><span class="when">15 a 30 dias</span></div>
+      <div class="step"><h3>Instalação</h3><p>Estrutura, módulos, inversor e proteções instalados pela nossa equipe.</p><span class="when">2 a 4 dias</span></div>
+      <div class="step"><h3>Vistoria e medidor novo</h3><p>A distribuidora vistoria e troca o medidor pelo bidirecional.</p><span class="when">7 a 15 dias</span></div>
+      <div class="step"><h3>Sistema gerando economia</h3><p>Ativação, monitoramento pelo aplicativo e suporte depois da instalação.</p><span class="when">Pronto</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- POR QUE A SUPERSUNN -->
+<section class="sec why" aria-labelledby="h-why">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2 id="h-why">Por que escolher a SUPERSUNN</h2>
+      <p>Comunicação clara, equipe técnica e um projeto feito para o seu consumo, não um kit genérico.</p>
+    </div>
+    <div class="why-grid">
+      <div class="why-item big">
+        <div class="bg-sun" aria-hidden="true"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200.00 200.00"><defs><linearGradient id="lpzsun" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFD23F"/><stop offset="1" stop-color="#FFB000"/></linearGradient>
+<linearGradient id="lpzbolt" x1="0.2" y1="0" x2="0.5" y2="1"><stop offset="0" stop-color="#FFB300"/><stop offset="0.55" stop-color="#FF8A00"/><stop offset="1" stop-color="#FF6A00"/></linearGradient><mask id="lpzm" maskUnits="userSpaceOnUse" x="-20" y="-20" width="240" height="240">
+<rect x="-20" y="-20" width="240" height="240" fill="#fff"/>
+<path d="M126,2L76,110L104,110L66,198L148,82L118,82L168,2Z" fill="#000" stroke="#000" stroke-width="13" stroke-linejoin="round"/></mask></defs><g transform="translate(0,0)"><g mask="url(#lpzm)"><path d="M101.65,50.02L118.92,4.86L119.13,53.24ZM122.18,54.41L147.78,28.49L137.00,63.58ZM139.33,65.74L180.65,46.11L149.24,79.46ZM150.50,82.29L184.35,83.22L153.97,98.47ZM153.97,101.53L195.14,118.92L150.50,117.71ZM149.24,120.54L171.51,147.78L139.33,134.26ZM137.00,136.42L153.89,180.65L122.18,145.59ZM119.13,146.76L116.78,184.35L101.65,149.98ZM98.35,149.98L81.08,195.14L80.87,146.76ZM77.82,145.59L52.22,171.51L63.00,136.42ZM60.67,134.26L19.35,153.89L50.76,120.54ZM49.50,117.71L15.65,116.78L46.03,101.53ZM46.03,98.47L4.86,81.08L49.50,82.29ZM50.76,79.46L28.49,52.22L60.67,65.74ZM63.00,63.58L46.11,19.35L77.82,54.41ZM80.87,53.24L83.22,15.65L98.35,50.02Z" fill="url(#lpzsun)"/><circle cx="100" cy="100" r="53" fill="none" stroke="url(#lpzsun)" stroke-width="13"/><path d="M70.56,117.00 A34,34 0 0 1 91.20,67.16" fill="none" stroke="url(#lpzsun)" stroke-width="11" stroke-linecap="round"/><path d="M133.67,95.27 A34,34 0 0 1 110.51,132.34" fill="none" stroke="url(#lpzsun)" stroke-width="11" stroke-linecap="round"/></g><path d="M126,2L76,110L104,110L66,198L148,82L118,82L168,2Z" fill="url(#lpzbolt)" stroke="url(#lpzbolt)" stroke-width="2" stroke-linejoin="round"/></g></svg></div>
+        <div><span class="ic"><svg aria-hidden="true"  fill="#fff" stroke-width="0" viewBox="0 0 576 512" height="24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M560 224h-29.5c-8.8-20-21.6-37.7-37.4-52.5L512 96h-32c-29.4 0-55.4 13.5-73 34.3-7.6-1.1-15.1-2.3-23-2.3H256c-77.4 0-141.9 55-156.8 128H56c-14.8 0-26.5-13.5-23.5-28.8C34.7 215.8 45.4 208 57 208h1c3.3 0 6-2.7 6-6v-20c0-3.3-2.7-6-6-6-28.5 0-53.9 20.4-57.5 48.6C-3.9 258.8 22.7 288 56 288h40c0 52.2 25.4 98.1 64 127.3V496c0 8.8 7.2 16 16 16h64c8.8 0 16-7.2 16-16v-48h128v48c0 8.8 7.2 16 16 16h64c8.8 0 16-7.2 16-16v-80.7c11.8-8.9 22.3-19.4 31.3-31.3H560c8.8 0 16-7.2 16-16V240c0-8.8-7.2-16-16-16zm-128 64c-8.8 0-16-7.2-16-16s7.2-16 16-16 16 7.2 16 16-7.2 16-16 16zM256 96h128c5.4 0 10.7.4 15.9.8 0-.3.1-.5.1-.8 0-53-43-96-96-96s-96 43-96 96c0 2.1.5 4.1.6 6.2 15.2-3.9 31-6.2 47.4-6.2z"></path></svg></span><h3>Economia na sua conta, mês após mês</h3><p>Redução imediata na fatura e mais previsibilidade frente aos reajustes da energia, que sobem quase todo ano.</p></div>
+        <a class="btn btn-primary" href="#simulador" style="align-self:flex-start;margin-top:28px;position:relative">Simular minha economia</a>
+      </div>
+      <div class="why-item"><span class="ic"><svg aria-hidden="true"  fill="#FF7A00" stroke-width="0" viewBox="0 0 576 512" height="22" width="22" xmlns="http://www.w3.org/2000/svg"><path d="M280.37 148.26L96 300.11V464a16 16 0 0 0 16 16l112.06-.29a16 16 0 0 0 15.92-16V368a16 16 0 0 1 16-16h64a16 16 0 0 1 16 16v95.64a16 16 0 0 0 16 16.05L464 480a16 16 0 0 0 16-16V300L295.67 148.26a12.19 12.19 0 0 0-15.3 0zM571.6 251.47L488 182.56V44.05a12 12 0 0 0-12-12h-56a12 12 0 0 0-12 12v72.61L318.47 43a48 48 0 0 0-61 0L4.34 251.47a12 12 0 0 0-1.6 16.9l25.5 31A12 12 0 0 0 45.15 301l235.22-193.74a12.19 12.19 0 0 1 15.3 0L530.9 301a12 12 0 0 0 16.9-1.6l25.5-31a12 12 0 0 0-1.7-16.93z"></path></svg></span><h3>Valorização do imóvel</h3><p>Imóveis com energia solar ficam mais atrativos para venda e aluguel.</p></div>
+      <div class="why-item"><span class="ic"><svg aria-hidden="true"  fill="#FF7A00" stroke-width="0" viewBox="0 0 576 512" height="22" width="22" xmlns="http://www.w3.org/2000/svg"><path d="M546.2 9.7c-5.6-12.5-21.6-13-28.3-1.2C486.9 62.4 431.4 96 368 96h-80C182 96 96 182 96 288c0 7 .8 13.7 1.5 20.5C161.3 262.8 253.4 224 384 224c8.8 0 16 7.2 16 16s-7.2 16-16 16C132.6 256 26 410.1 2.4 468c-6.6 16.3 1.2 34.9 17.5 41.6 16.4 6.8 35-1.1 41.8-17.3 1.5-3.6 20.9-47.9 71.9-90.6 32.4 43.9 94 85.8 174.9 77.2C465.5 467.5 576 326.7 576 154.3c0-50.2-10.8-102.2-29.8-144.6z"></path></svg></span><h3>Energia limpa</h3><p>Menos emissões e uso consciente de um recurso renovável.</p></div>
+      <div class="why-item"><span class="ic"><svg aria-hidden="true"  fill="#FF7A00" stroke-width="0" viewBox="0 0 640 512" height="22" width="22" xmlns="http://www.w3.org/2000/svg"><path d="M434.7 64h-85.9c-8 0-15.7 3-21.6 8.4l-98.3 90c-.1.1-.2.3-.3.4-16.6 15.6-16.3 40.5-2.1 56 12.7 13.9 39.4 17.6 56.1 2.7.1-.1.3-.1.4-.2l79.9-73.2c6.5-5.9 16.7-5.5 22.6 1 6 6.5 5.5 16.6-1 22.6l-26.1 23.9L504 313.8c2.9 2.4 5.5 5 7.9 7.7V128l-54.6-54.6c-5.9-6-14.1-9.4-22.6-9.4zM544 128.2v223.9c0 17.7 14.3 32 32 32h64V128.2h-96zm48 223.9c-8.8 0-16-7.2-16-16s7.2-16 16-16 16 7.2 16 16-7.2 16-16 16zM0 384h64c17.7 0 32-14.3 32-32V128.2H0V384zm48-63.9c8.8 0 16 7.2 16 16s-7.2 16-16 16-16-7.2-16-16c0-8.9 7.2-16 16-16zm435.9 18.6L334.6 217.5l-30 27.5c-29.7 27.1-75.2 24.5-101.7-4.4-26.9-29.4-24.8-74.9 4.4-101.7L289.1 64h-83.8c-8.5 0-16.6 3.4-22.6 9.4L128 128v223.9h18.3l90.5 81.9c27.4 22.3 67.7 18.1 90-9.3l.2-.2 17.9 15.5c15.9 13 39.4 10.5 52.3-5.4l31.4-38.6 5.4 4.4c13.7 11.1 33.9 9.1 45-4.7l9.5-11.7c11.2-13.8 9.1-33.9-4.6-45.1z"></path></svg></span><h3>Atendimento especializado</h3><p>Uma equipe que explica cada etapa e acompanha você depois da instalação.</p></div>
+      <div class="why-item"><span class="ic"><svg aria-hidden="true"  fill="#FF7A00" stroke-width="0" viewBox="0 0 512 512" height="22" width="22" xmlns="http://www.w3.org/2000/svg"><path d="M501.1 395.7L384 278.6c-23.1-23.1-57.6-27.6-85.4-13.9L192 158.1V96L64 0 0 64l96 128h62.1l106.6 106.6c-13.6 27.8-9.2 62.3 13.9 85.4l117.1 117.1c14.6 14.6 38.2 14.6 52.7 0l52.7-52.7c14.5-14.6 14.5-38.2 0-52.7zM331.7 225c28.3 0 54.9 11 74.9 31l19.4 19.4c15.8-6.9 30.8-16.5 43.8-29.5 37.1-37.1 49.7-89.3 37.9-136.7-2.2-9-13.5-12.1-20.1-5.5l-74.4 74.4-67.9-11.3L334 98.9l74.4-74.4c6.6-6.6 3.4-17.9-5.7-20.2-47.4-11.7-99.6.9-136.6 37.9-28.5 28.5-41.9 66.1-41.2 103.6l82.1 82.1c8.1-1.9 16.5-2.9 24.7-2.9zm-103.9 82l-56.7-56.7L18.7 402.8c-25 25-25 65.5 0 90.5s65.5 25 90.5 0l123.6-123.6c-7.6-19.9-9.9-41.6-5-62.7zM64 472c-13.2 0-24-10.8-24-24 0-13.3 10.7-24 24-24s24 10.7 24 24c0 13.2-10.7 24-24 24z"></path></svg></span><h3>Tudo em um só lugar</h3><p>Projeto, equipamentos, instalação e homologação com um único contato.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="sec" id="duvidas" aria-labelledby="h-faq">
+  <div class="wrap">
+    <div class="sec-head" style="margin:0 auto;text-align:center">
+      <h2 id="h-faq">Dúvidas frequentes</h2>
+    </div>
+    <div class="faq">
+      <details><summary>A conta de luz zera?</summary><p>Não chega a zero. Você continua pagando a taxa mínima da distribuidora (custo de disponibilidade) e a iluminação pública, e, pela Lei 14.300, uma parte do Fio B sobre a energia compensada. Mesmo assim, a redução costuma ser grande, como mostra o simulador.</p></details>
+      <details><summary>E nos dias nublados ou à noite?</summary><p>Você continua recebendo energia da rede normalmente. A energia que sobra nos dias de sol vira crédito e é usada à noite, em dias nublados e nos meses seguintes.</p></details>
+      <details><summary>Quanto tempo leva para o sistema se pagar?</summary><p>Depende do valor da conta, da tarifa da sua região e do tamanho do sistema. O simulador mostra uma estimativa para o seu caso, e a proposta traz o cálculo completo ano a ano.</p></details>
+      <details><summary>Dá para financiar?</summary><p>Sim. Trabalhamos com financiamento solar e parcelamento no cartão. Em muitos casos a parcela fica perto do valor que você deixa de pagar na conta de luz.</p></details>
+      <details><summary>Meu telhado serve?</summary><p>A maioria dos telhados cerâmicos, metálicos e lajes recebe o sistema. Na visita técnica avaliamos a estrutura, a orientação e o sombreamento antes de fechar o projeto.</p></details>
+      <details><summary>Precisa de manutenção?</summary><p>Pouca. Basicamente limpeza periódica dos módulos e acompanhamento da geração pelo aplicativo do inversor.</p></details>
+    </div>
+  </div>
+</section>
+
+<!-- CTA FINAL -->
+<section class="cta" aria-labelledby="h-cta">
+  <div class="wrap">
+    <h2 id="h-cta">Energia inteligente para um futuro mais sustentável.</h2>
+    <p>Descubra em 1 minuto quanto a sua conta de luz pode cair.</p>
+    <div class="btns">
+      <a class="btn btn-primary" href="#simulador">Simular minha economia</a>
+      <a class="btn btn-ghost" id="ctaWa" href="#" target="_blank" rel="noopener">Falar no WhatsApp</a>
+    </div>
+  </div>
+  <svg class="hero-swoosh" viewBox="0 0 1440 150" preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id="sw2" x1="0" x2="1"><stop offset="0" stop-color="#FFC400"/><stop offset="1" stop-color="#FF7A00"/></linearGradient></defs><path d="M0 104 C440 96 980 62 1440 0 L1440 24 C980 86 460 124 0 132 Z" fill="#FFC400"/><path d="M0 150 L0 140 C480 130 1000 90 1440 36 L1440 150 Z" fill="url(#sw2)"/></svg>
+</section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div><svg class="logo" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 847.90 190.00"><defs><linearGradient id="lpnsun" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFD23F"/><stop offset="1" stop-color="#FFB000"/></linearGradient>
+<linearGradient id="lpnbolt" x1="0.2" y1="0" x2="0.5" y2="1"><stop offset="0" stop-color="#FFB300"/><stop offset="0.55" stop-color="#FF8A00"/><stop offset="1" stop-color="#FF6A00"/></linearGradient><mask id="lpnm" maskUnits="userSpaceOnUse" x="-20" y="-20" width="240" height="240">
+<rect x="-20" y="-20" width="240" height="240" fill="#fff"/>
+<path d="M126,2L76,110L104,110L66,198L148,82L118,82L168,2Z" fill="#000" stroke="#000" stroke-width="13" stroke-linejoin="round"/></mask></defs><g transform="translate(0,0)"><g transform="scale(0.95)"><g mask="url(#lpnm)"><path d="M101.65,50.02L118.92,4.86L119.13,53.24ZM122.18,54.41L147.78,28.49L137.00,63.58ZM139.33,65.74L180.65,46.11L149.24,79.46ZM150.50,82.29L184.35,83.22L153.97,98.47ZM153.97,101.53L195.14,118.92L150.50,117.71ZM149.24,120.54L171.51,147.78L139.33,134.26ZM137.00,136.42L153.89,180.65L122.18,145.59ZM119.13,146.76L116.78,184.35L101.65,149.98ZM98.35,149.98L81.08,195.14L80.87,146.76ZM77.82,145.59L52.22,171.51L63.00,136.42ZM60.67,134.26L19.35,153.89L50.76,120.54ZM49.50,117.71L15.65,116.78L46.03,101.53ZM46.03,98.47L4.86,81.08L49.50,82.29ZM50.76,79.46L28.49,52.22L60.67,65.74ZM63.00,63.58L46.11,19.35L77.82,54.41ZM80.87,53.24L83.22,15.65L98.35,50.02Z" fill="url(#lpnsun)"/><circle cx="100" cy="100" r="53" fill="none" stroke="url(#lpnsun)" stroke-width="13"/><path d="M70.56,117.00 A34,34 0 0 1 91.20,67.16" fill="none" stroke="url(#lpnsun)" stroke-width="11" stroke-linecap="round"/><path d="M133.67,95.27 A34,34 0 0 1 110.51,132.34" fill="none" stroke="url(#lpnsun)" stroke-width="11" stroke-linecap="round"/></g><path d="M126,2L76,110L104,110L66,198L148,82L118,82L168,2Z" fill="url(#lpnbolt)" stroke="url(#lpnbolt)" stroke-width="2" stroke-linejoin="round"/></g><g transform="translate(202.0,37.36)"><path d="M27.700000000000003 73.4Q18.7 73.4 10.95 71.25Q3.2 69.1 -1.5 65.9L6.300000000000001 51.099999999999994Q11.600000000000001 54.5 17.6 56.25Q23.6 58.0 29.6 58.0Q35.300000000000004 58.0 38.45 56.35Q41.6 54.7 41.6 51.8Q41.6 49.4 39.150000000000006 48.05Q36.7 46.7 32.800000000000004 45.7Q28.900000000000002 44.7 24.550000000000004 43.45Q20.200000000000003 42.2 16.35 40.1Q12.5 38.0 10.05 34.55Q7.6000000000000005 31.099999999999994 7.6000000000000005 25.599999999999994Q7.6000000000000005 18.0 11.700000000000001 12.399999999999999Q15.8 6.799999999999997 23.35 3.6999999999999957Q30.900000000000002 0.5999999999999943 41.2 0.5999999999999943Q48.7 0.5999999999999943 55.2 2.1499999999999986Q61.7 3.700000000000003 66.4 6.599999999999994L59.2 21.299999999999997Q55.1 18.699999999999996 50.150000000000006 17.349999999999998Q45.2 16.0 40.0 16.0Q33.9 16.0 30.65 18.0Q27.400000000000002 20.0 27.400000000000002 22.799999999999997Q27.3 25.699999999999996 30.9 27.099999999999998Q34.5 28.5 39.400000000000006 29.799999999999997Q43.1 30.799999999999997 46.95 32.05Q50.800000000000004 33.3 54.10000000000001 35.3Q57.400000000000006 37.3 59.400000000000006 40.449999999999996Q61.400000000000006 43.599999999999994 61.400000000000006 48.5Q61.400000000000006 56.0 57.25 61.6Q53.1 67.2 45.55 70.30000000000001Q38.0 73.4 27.700000000000003 73.4ZM97.7 73.4Q87.2 73.4 80.1 69.35Q73.0 65.3 70.15 58.0Q67.3 50.7 69.2 40.8L77.0 2.0H96.80000000000001L89.10000000000001 40.5Q87.4 49.0 90.35000000000001 53.0Q93.30000000000001 57.0 100.1 57.0Q106.30000000000001 57.0 110.0 53.2Q113.7 49.4 115.5 40.5L123.2 2.0H142.7L134.8 41.7Q131.60000000000002 57.4 122.35000000000002 65.4Q113.10000000000001 73.4 97.7 73.4ZM139.5 72.0 153.5 2.0H183.10000000000002Q196.70000000000002 2.0 204.10000000000002 7.949999999999999Q211.5 13.899999999999999 211.5 24.5Q211.5 33.3 207.25 39.9Q203.0 46.5 195.2 50.1Q187.4 53.7 176.9 53.7H163.0L159.3 72.0ZM166.10000000000002 38.1H177.8Q184.3 38.1 187.9 35.05Q191.5 32.0 191.5 26.199999999999996Q191.5 21.799999999999997 188.60000000000002 19.699999999999996Q185.70000000000002 17.599999999999994 180.5 17.599999999999994H170.20000000000002ZM233.8 56.7H270.5L267.3 72.0H211.20000000000002L225.20000000000002 2.0H280.0L276.90000000000003 17.299999999999997H241.60000000000002L239.3 29.099999999999994H270.40000000000003L267.5 43.9H236.3ZM276.40000000000003 72.0 290.40000000000003 2.0H320.3Q333.70000000000005 2.0 341.1 7.899999999999999Q348.5 13.799999999999997 348.5 24.299999999999997Q348.5 34.0 343.35 40.95Q338.20000000000005 47.9 329.1 51.0L341.0 72.0H320.3L309.8 53.4H300.0L296.2 72.0ZM303.0 38.1H314.70000000000005Q321.20000000000005 38.1 324.85 35.05Q328.5 32.0 328.5 26.199999999999996Q328.5 21.799999999999997 325.55 19.699999999999996Q322.6 17.599999999999994 317.5 17.599999999999994H307.1Z" fill="#FFFFFF"/><path d="M376.5 73.4Q367.5 73.4 359.75 71.25Q352.0 69.1 347.3 65.9L355.1 51.099999999999994Q360.40000000000003 54.5 366.40000000000003 56.25Q372.40000000000003 58.0 378.40000000000003 58.0Q384.1 58.0 387.25 56.35Q390.40000000000003 54.7 390.40000000000003 51.8Q390.40000000000003 49.4 387.95000000000005 48.05Q385.5 46.7 381.6 45.7Q377.7 44.7 373.35 43.45Q369.0 42.2 365.15 40.1Q361.3 38.0 358.85 34.55Q356.40000000000003 31.099999999999994 356.40000000000003 25.599999999999994Q356.40000000000003 18.0 360.5 12.399999999999999Q364.6 6.799999999999997 372.15 3.6999999999999957Q379.7 0.5999999999999943 390.0 0.5999999999999943Q397.5 0.5999999999999943 404.0 2.1499999999999986Q410.5 3.700000000000003 415.20000000000005 6.599999999999994L408.0 21.299999999999997Q403.90000000000003 18.699999999999996 398.95000000000005 17.349999999999998Q394.0 16.0 388.8 16.0Q382.7 16.0 379.45 18.0Q376.2 20.0 376.2 22.799999999999997Q376.1 25.699999999999996 379.70000000000005 27.099999999999998Q383.3 28.5 388.20000000000005 29.799999999999997Q391.90000000000003 30.799999999999997 395.75 32.05Q399.6 33.3 402.90000000000003 35.3Q406.20000000000005 37.3 408.20000000000005 40.449999999999996Q410.20000000000005 43.599999999999994 410.20000000000005 48.5Q410.20000000000005 56.0 406.05000000000007 61.6Q401.90000000000003 67.2 394.35 70.30000000000001Q386.8 73.4 376.5 73.4ZM446.5 73.4Q436.0 73.4 428.9 69.35Q421.8 65.3 418.95000000000005 58.0Q416.1 50.7 418.0 40.8L425.8 2.0H445.6L437.9 40.5Q436.2 49.0 439.15 53.0Q442.1 57.0 448.9 57.0Q455.1 57.0 458.8 53.2Q462.5 49.4 464.3 40.5L472.0 2.0H491.5L483.6 41.7Q480.4 57.4 471.15 65.4Q461.9 73.4 446.5 73.4ZM488.30000000000007 72.0 502.30000000000007 2.0H518.6L541.8000000000001 40.3L549.4000000000001 2.0H568.8000000000001L554.8000000000001 72.0H538.5L515.4000000000001 33.699999999999996L507.70000000000005 72.0ZM566.9 72.0 580.9 2.0H597.1999999999999L620.4 40.3L628.0 2.0H647.4L633.4 72.0H617.0999999999999L594.0 33.699999999999996L586.3 72.0Z" fill="#FF7A00"/><path d="M150.90150000000006 114.0V96.15H164.39100000000005V99.465H155.00700000000006V103.34100000000001H163.29450000000006V106.554H155.00700000000006V110.685H164.72250000000005V114.0ZM178.72200000000007 114.0V96.15H182.13900000000007L191.01300000000006 107.013V96.15H195.09300000000007V114.0H191.70150000000007L182.80200000000005 103.137V114.0ZM210.03600000000006 114.0V96.15H223.52550000000005V99.465H214.14150000000006V103.34100000000001H222.42900000000006V106.554H214.14150000000006V110.685H223.85700000000006V114.0ZM237.85650000000004 114.0V96.15H245.48100000000005Q249.20400000000004 96.15 251.26950000000005 97.884Q253.33500000000004 99.618 253.33500000000004 102.627Q253.33500000000004 104.616 252.37875000000003 106.05675Q251.42250000000004 107.4975 249.68850000000003 108.2625L253.66650000000004 114.0H249.22950000000003L245.78700000000003 109.0275Q245.68500000000003 109.0275 245.58300000000003 109.0275H241.98750000000004V114.0ZM241.98750000000004 105.738H245.35350000000003Q247.24050000000003 105.738 248.19675000000004 104.90925Q249.15300000000005 104.0805 249.15300000000005 102.627Q249.15300000000005 101.148 248.19675000000004 100.332Q247.24050000000003 99.516 245.35350000000003 99.516H241.98750000000004ZM275.92800000000005 114.306Q273.8115 114.306 272.03925000000004 113.6175Q270.26700000000005 112.929 268.95375 111.69225Q267.64050000000003 110.4555 266.91375000000005 108.77250000000001Q266.18700000000007 107.0895 266.18700000000007 105.075Q266.18700000000007 103.0605 266.91375000000005 101.3775Q267.64050000000003 99.6945 268.96650000000005 98.45775Q270.2925000000001 97.221 272.0775000000001 96.5325Q273.86250000000007 95.844 276.00450000000006 95.844Q278.35050000000007 95.844 280.26300000000003 96.6345Q282.17550000000006 97.425 283.47600000000006 98.9295L280.82400000000007 101.3775Q278.91150000000005 99.363 276.2085000000001 99.363Q274.47450000000003 99.363 273.16125000000005 100.077Q271.84800000000007 100.791 271.10850000000005 102.07875Q270.369 103.3665 270.369 105.075Q270.369 106.7325 271.10850000000005 108.033Q271.84800000000007 109.3335 273.14850000000007 110.06025Q274.44900000000007 110.787 276.1575 110.787Q276.999 110.787 277.8022500000001 110.62125Q278.60550000000006 110.4555 279.37050000000005 110.0475V104.7945H283.14450000000005V112.0365Q281.66550000000007 113.1585 279.75300000000004 113.73225Q277.8405000000001 114.306 275.92800000000005 114.306ZM297.6795 114.0V96.15H301.81050000000005V114.0ZM314.4075000000001 114.0 322.36350000000004 96.15H326.4435000000001L334.42500000000007 114.0H330.09000000000003L328.50900000000007 110.175H320.22150000000005L318.64050000000003 114.0ZM321.52200000000005 107.0385H327.2085000000001L324.37800000000004 100.23ZM370.788 114.306Q368.646 114.306 366.6825 113.73225Q364.71900000000005 113.1585 363.5205 112.2405L364.923 109.12950000000001Q366.045 109.9455 367.62600000000003 110.46825Q369.20700000000005 110.991 370.81350000000003 110.991Q372.64950000000005 110.991 373.45275000000004 110.4555Q374.25600000000003 109.92 374.25600000000003 109.0785Q374.25600000000003 108.3645 373.69500000000005 107.94375Q373.134 107.523 372.20325 107.25524999999999Q371.27250000000004 106.9875 370.17600000000004 106.74525Q369.07950000000005 106.503 367.9702500000001 106.15875Q366.86100000000005 105.8145 365.93025 105.24074999999999Q364.9995 104.667 364.43850000000003 103.73625Q363.87750000000005 102.8055 363.87750000000005 101.403Q363.87750000000005 99.873 364.70625000000007 98.61075Q365.535 97.3485 367.20525000000004 96.59625Q368.87550000000005 95.844 371.40000000000003 95.844Q373.083 95.844 374.71500000000003 96.252Q376.34700000000004 96.66 377.59650000000005 97.425L376.3215 100.5615Q375.072 99.8475 373.80975 99.50325000000001Q372.5475 99.159 371.3745 99.159Q369.5385 99.159 368.76075000000003 99.75825Q367.983 100.3575 367.983 101.199Q367.983 101.8875 368.544 102.30825Q369.105 102.729 370.023 102.99674999999999Q370.94100000000003 103.2645 372.05025 103.494Q373.15950000000004 103.7235 374.26875000000007 104.06775Q375.37800000000004 104.412 376.30875000000003 104.97300000000001Q377.2395 105.534 377.80050000000006 106.452Q378.36150000000004 107.37 378.36150000000004 108.7725Q378.36150000000004 110.277 377.53275 111.5265Q376.704 112.776 375.021 113.541Q373.338 114.306 370.788 114.306ZM400.5465000000001 114.306Q398.43000000000006 114.306 396.6577500000001 113.6175Q394.8855000000001 112.929 393.55950000000007 111.6795Q392.23350000000005 110.43 391.50675000000007 108.747Q390.7800000000001 107.064 390.7800000000001 105.075Q390.7800000000001 103.086 391.50675000000007 101.40299999999999Q392.23350000000005 99.72 393.55950000000007 98.4705Q394.8855000000001 97.221 396.6577500000001 96.5325Q398.43000000000006 95.844 400.5465000000001 95.844Q402.66300000000007 95.844 404.4352500000001 96.5325Q406.2075000000001 97.221 407.5335000000001 98.45775Q408.8595000000001 99.6945 409.58625000000006 101.39025000000001Q410.31300000000005 103.086 410.31300000000005 105.075Q410.31300000000005 107.064 409.58625000000006 108.75975Q408.8595000000001 110.4555 407.5335000000001 111.69225Q406.2075000000001 112.929 404.4352500000001 113.6175Q402.66300000000007 114.306 400.5465000000001 114.306ZM400.5465000000001 110.787Q402.12750000000005 110.787 403.38975000000005 110.06025Q404.65200000000004 109.3335 405.39150000000006 108.04575Q406.1310000000001 106.758 406.1310000000001 105.075Q406.1310000000001 103.392 405.39150000000006 102.10425000000001Q404.65200000000004 100.8165 403.38975000000005 100.08975000000001Q402.12750000000005 99.363 400.5465000000001 99.363Q398.9655000000001 99.363 397.7032500000001 100.08975000000001Q396.4410000000001 100.8165 395.70150000000007 102.10425000000001Q394.96200000000005 103.392 394.96200000000005 105.075Q394.96200000000005 106.758 395.70150000000007 108.04575Q396.4410000000001 109.3335 397.7032500000001 110.06025Q398.9655000000001 110.787 400.5465000000001 110.787ZM424.134 114.0V96.15H428.26500000000004V110.634H437.2155V114.0ZM447.90000000000003 114.0 455.856 96.15H459.93600000000004L467.9175 114.0H463.5825L462.0015 110.175H453.714L452.133 114.0ZM455.0145 107.0385H460.701L457.8705 100.23ZM480.48900000000003 114.0V96.15H488.11350000000004Q491.83650000000006 96.15 493.90200000000004 97.884Q495.9675000000001 99.618 495.9675000000001 102.627Q495.9675000000001 104.616 495.0112500000001 106.05675Q494.05500000000006 107.4975 492.3210000000001 108.2625L496.29900000000004 114.0H491.8620000000001L488.4195000000001 109.0275Q488.31750000000005 109.0275 488.2155000000001 109.0275H484.62000000000006V114.0ZM484.62000000000006 105.738H487.98600000000005Q489.87300000000005 105.738 490.82925000000006 104.90925Q491.78550000000007 104.0805 491.78550000000007 102.627Q491.78550000000007 101.148 490.82925000000006 100.332Q489.87300000000005 99.516 487.98600000000005 99.516H484.62000000000006Z" fill="#FFFFFF"/><rect x="53.43" y="102.53" width="77.51" height="5.10" rx="2.55" fill="#FF7A00"/><rect x="514.97" y="102.53" width="77.51" height="5.10" rx="2.55" fill="#FF7A00"/></g></g></svg><p style="margin-top:14px;max-width:340px">Projetos de energia solar para residências, comércios, empresas e propriedades rurais.</p></div>
+    <div><h4>Contato</h4><ul id="contactList"></ul></div>
+    <div><h4>Navegue</h4><ul><li><a href="#simulador">Simulador</a></li><li><a href="#como-funciona">Como funciona</a></li><li><a href="#lei-14300">Lei 14.300</a></li><li><a href="#duvidas">Dúvidas</a></li></ul></div>
+    <div class="copy" id="copyLine">© SUPERSUNN Energia Solar.</div>
+  </div>
+</footer>
+
+<a class="wa-float" id="waFloat" href="#" target="_blank" rel="noopener" aria-label="Falar no WhatsApp"><svg aria-hidden="true"  fill="#fff" stroke-width="0" viewBox="0 0 448 512" height="30" width="30" xmlns="http://www.w3.org/2000/svg"><path d="M380.9 97.1C339 55.1 283.2 32 223.9 32c-122.4 0-222 99.6-222 222 0 39.1 10.2 77.3 29.6 111L0 480l117.7-30.9c32.4 17.7 68.9 27 106.1 27h.1c122.3 0 224.1-99.6 224.1-222 0-59.3-25.2-115-67.1-157zm-157 341.6c-33.2 0-65.7-8.9-94-25.7l-6.7-4-69.8 18.3L72 359.2l-4.4-7c-18.5-29.4-28.2-63.3-28.2-98.2 0-101.7 82.8-184.5 184.6-184.5 49.3 0 95.6 19.2 130.4 54.1 34.8 34.9 56.2 81.2 56.1 130.5 0 101.8-84.9 184.6-186.6 184.6zm101.2-138.2c-5.5-2.8-32.8-16.2-37.9-18-5.1-1.9-8.8-2.8-12.5 2.8-3.7 5.6-14.3 18-17.6 21.8-3.2 3.7-6.5 4.2-12 1.4-32.6-16.3-54-29.1-75.5-66-5.7-9.8 5.7-9.1 16.3-30.3 1.8-3.7.9-6.9-.5-9.7-1.4-2.8-12.5-30.1-17.1-41.2-4.5-10.8-9.1-9.3-12.5-9.5-3.2-.2-6.9-.2-10.6-.2-3.7 0-9.7 1.4-14.8 6.9-5.1 5.6-19.4 19-19.4 46.3 0 27.3 19.9 53.7 22.6 57.4 2.8 3.7 39.1 59.7 94.8 83.8 35.2 15.2 49 16.5 66.6 13.9 10.7-1.6 32.8-13.4 37.4-26.4 4.6-13 4.6-24.1 3.2-26.4-1.3-2.5-5-3.9-10.5-6.6z"></path></svg></a>
+
+<script>
+/* =========================================================================
+   CONFIGURAÇÃO — edite antes de publicar no seu domínio
+   ========================================================================= */
+const CONFIG = {
+  whatsapp: '5534999485920',            // DDI + DDD + número, só dígitos
+  telefoneExibicao: '(34) 99948-5920',
+  email: 'contato@supersunn.com.br',
+  instagram: '@supersunn',
+  cnpj: '',                              // ex.: 00.000.000/0001-00
+  // Leads vão para o Supabase (tabela "leads"): de lá caem no funil do CRM, na planilha e no aviso de WhatsApp
+  supabaseUrl: 'https://cjeafaroqlticmeqgchs.supabase.co',
+  supabaseKey: 'sb_publishable_yBbEK2TZCL5jbuwexfdyIg_EHKZDqKw',   // chave pública (anon): só permite gravar leads
+  leadWebhook: '',                       // opcional: outra URL que também recebe o lead em JSON
+  metaPixelId: '',                       // ID do Pixel da Meta para registrar o evento "Lead"
+  tarifa: 1.21,                          // R$/kWh com impostos (média usada na estimativa)
+  precoFixo: 4000, precoPorKwp: 2700,    // investimento estimado = fixo + kWp × preço
+  moduloW: 600, areaPorModulo: 1.13 * 2.35,   // módulo de 600 W, 1,13 m × 2,35 m
+  reajusteTarifa: 6, degradacao: 0.5, fioBPctTarifa: 25, anos: 25, pr: 0.78,
+  iluminacaoPublica: 50                  // R$/mês, entra na conta com e sem energia solar
+};
+/* irradiação média (HSP, kWh/m²/dia) por estado — capitais, referência CRESESB */
+const HSP = {AC:4.6,AL:5.6,AP:4.7,AM:4.5,BA:5.3,CE:5.7,DF:5.5,ES:5.0,GO:5.4,MA:5.2,MT:5.2,MS:5.1,MG:5.3,PA:4.6,PB:5.6,PR:4.4,PE:5.5,PI:5.6,RJ:4.9,RN:5.8,RS:4.7,RO:4.6,RR:4.8,SC:4.5,SP:4.6,SE:5.5,TO:5.3};
+const UF_NOMES = {AC:'Acre',AL:'Alagoas',AP:'Amapá',AM:'Amazonas',BA:'Bahia',CE:'Ceará',DF:'Distrito Federal',ES:'Espírito Santo',GO:'Goiás',MA:'Maranhão',MT:'Mato Grosso',MS:'Mato Grosso do Sul',MG:'Minas Gerais',PA:'Pará',PB:'Paraíba',PR:'Paraná',PE:'Pernambuco',PI:'Piauí',RJ:'Rio de Janeiro',RN:'Rio Grande do Norte',RS:'Rio Grande do Sul',RO:'Rondônia',RR:'Roraima',SC:'Santa Catarina',SP:'São Paulo',SE:'Sergipe',TO:'Tocantins'};
+const FIOB = {2023:15,2024:30,2025:45,2026:60,2027:75,2028:90}; // depois de 2028: 100% (art. 17, premissa conservadora)
+const DISP = {mono:30, bi:50, tri:100};
+/* fator de simultaneidade por classe (fator de ajuste regulatório): parte da geração usada na hora, sem Fio B */
+const SIMULT = {casa:46, comercio:63, rural:53, industria:69};
+
+const state = { conta:450, uf:'MG', tipo:'casa', ligacao:'bi', unsure:false, lead:null, result:null };
+const $ = id => document.getElementById(id);
+const brl = (v, dec=0) => 'R$ ' + Number(v).toLocaleString('pt-BR',{minimumFractionDigits:dec, maximumFractionDigits:dec});
+const anosMeses = a => { if(a==null) return 'acima de 25 anos'; let y=Math.floor(a), m=Math.round((a-y)*12); if(m===12){y++;m=0;} return [y?`${y} ano${y>1?'s':''}`:'', m?`${m} ${m>1?'meses':'mês'}`:''].filter(Boolean).join(' e '); };
+
+/* ---------- motor de cálculo (Lei 14.300) ---------- */
+function fioBPct(ano){ return ano < 2023 ? 0 : (FIOB[ano] ?? 100); }
+function simular(){
+  const C = CONFIG, tarifa = C.tarifa, disp = DISP[state.ligacao];
+  const cip = C.iluminacaoPublica;
+  const consumo = Math.max((state.conta - cip) / tarifa, disp + 10);
+  const hsp = HSP[state.uf];
+  const alvo = Math.max(consumo - disp, 0);
+  let kwp = alvo / (hsp * 30.42 * C.pr);
+  const modulos = Math.max(Math.ceil(kwp * 1000 / C.moduloW), 4);
+  kwp = modulos * C.moduloW / 1000;
+  const geracao = kwp * hsp * 30.42 * C.pr;
+  const invest = C.precoFixo + kwp * C.precoPorKwp;
+  const fioB = tarifa * C.fioBPctTarifa / 100, sim = SIMULT[state.tipo] / 100;
+  const inicio = new Date(); inicio.setDate(inicio.getDate() + 60);
+  const y0 = inicio.getFullYear(), m0 = inicio.getMonth();
+  let credito = 0, acc = -invest, payback = null, eco25 = 0, sem1 = 0, com1 = 0;
+  for(let a=0; a<C.anos; a++){
+    const f = Math.pow(1 + C.reajusteTarifa/100, a);
+    let semA = 0, comA = 0;
+    for(let k=0; k<12; k++){
+      const ano = y0 + Math.floor((m0 + a*12 + k) / 12);
+      const G = geracao * Math.pow(1 - C.degradacao/100, a);
+      const S = Math.min(G * sim, consumo), inj = G - S, rede = consumo - S;
+      const disponivel = credito + inj, K = Math.min(disponivel, rede); credito = disponivel - K;
+      const conta = Math.max((rede - K) * tarifa * f + K * fioB * f * fioBPct(ano)/100, disp * tarifa * f);
+      semA += consumo * tarifa * f + cip; comA += conta + cip;
+    }
+    const eco = semA - comA, ant = acc; acc += eco; eco25 += eco;
+    if(payback === null && acc >= 0) payback = a + (-ant / eco);
+    if(a === 0){ sem1 = semA/12; com1 = comA/12; }
+  }
+  return { consumo, kwp, modulos, geracao, area: modulos * C.areaPorModulo, invest,
+           contaHoje: sem1, contaSolar: com1, economia: sem1 - com1, pct: (1 - com1/sem1) * 100, payback, eco25, hsp, disp };
+}
+
+/* ---------- interface do simulador ---------- */
+function syncRange(){
+  const r = $('billRange'); const p = (r.value - r.min) / (r.max - r.min) * 100;
+  r.style.setProperty('--p', p + '%');
+}
+const unlocked = () => !!state.lead;
+const MASK = {kwh:'000 kWh', kwp:'0,00 kWp', brl:'R$ 000', pct:'00%', txt:'R$ 000,00'};
+function render(){
+  const r = state.result = simular();
+  if(!unlocked()){
+    $('rcKwh').textContent = MASK.kwh; $('rcKwp').textContent = MASK.kwp;
+    $('rcOld').textContent = brl(state.conta); $('rcNew').textContent = MASK.brl;
+    $('rcSave').textContent = 'R$ 000 por mês'; $('rcPctTxt').textContent = MASK.pct; $('rcPct').style.setProperty('--deg','220deg');
+    ['rEco','rPct','rSys','rArea','rPay','r25','rGer'].forEach(id => $(id).textContent = id==='rPct' ? MASK.pct : (id==='rSys' ? '0,00 kWp' : (id==='rPay'||id==='rArea'||id==='rGer' ? '00 unidades' : MASK.txt)));
+    return;
+  }
+  $('rcKwh').textContent = Math.round(r.consumo).toLocaleString('pt-BR') + ' kWh';
+  $('rcKwp').textContent = r.kwp.toFixed(2).replace('.', ',') + ' kWp';
+  $('rcOld').textContent = brl(r.contaHoje);
+  $('rcNew').textContent = brl(r.contaSolar);
+  $('rcSave').textContent = brl(r.economia) + ' por mês';
+  $('rcPctTxt').textContent = Math.round(r.pct) + '%';
+  $('rcPct').style.setProperty('--deg', (r.pct * 3.6) + 'deg');
+  $('rcStamp').textContent = '−' + Math.round(r.pct) + '% na conta';
+  $('rEco').textContent = brl(r.economia);
+  $('rPct').textContent = Math.round(r.pct) + '%';
+  $('rSys').textContent = `${r.kwp.toFixed(2).replace('.', ',')} kWp`;
+  $('rArea').textContent = `${Math.round(r.area)} m²`;
+  $('rPay').textContent = anosMeses(r.payback);
+  $('r25').textContent = brl(r.eco25);
+  $('rGer').textContent = Math.round(r.geracao).toLocaleString('pt-BR') + ' kWh';
+  $('resNote').textContent = `Estimativa com irradiação média de ${String(r.hsp).replace('.',',')} kWh/m²/dia em ${UF_NOMES[state.uf]}, tarifa de ${brl(CONFIG.tarifa,2)}/kWh com reajuste de ${CONFIG.reajusteTarifa}% ao ano, fator de simultaneidade de ${SIMULT[state.tipo]}% (sem Fio B sobre a energia usada na hora), taxa mínima de ${r.disp} kWh, iluminação pública de ${brl(CONFIG.iluminacaoPublica,2)} e cobrança do Fio B pela Lei 14.300. O valor final depende da visita técnica.`;
+  const rc = $('receipt'); rc.classList.remove('bump'); void rc.offsetWidth; rc.classList.add('bump');
+  if(state.lead) $('waBtn').href = waLink(leadMessage(state.lead, r));
+}
+function setConta(v, from){
+  v = Math.min(Math.max(Math.round(Number(String(v).replace(/\D/g,''))) || 0, 0), 20000);
+  state.conta = Math.max(v, 60);
+  if(from !== 'num') $('billNum').value = state.conta;
+  if(from !== 'range') $('billRange').value = Math.min(Math.max(state.conta, 100), 3000);
+  syncRange(); render();
+}
+$('billRange').addEventListener('input', e => setConta(e.target.value, 'range'));
+$('billNum').addEventListener('input', e => { const v = e.target.value.replace(/\D/g,''); e.target.value = v; if(v) setConta(v, 'num'); });
+$('billNum').addEventListener('blur', () => setConta($('billNum').value || 450));
+const ufSel = $('uf');
+Object.keys(UF_NOMES).sort((a,b)=>UF_NOMES[a].localeCompare(UF_NOMES[b])).forEach(uf => ufSel.add(new Option(UF_NOMES[uf], uf, uf===state.uf, uf===state.uf)));
+ufSel.addEventListener('change', () => { state.uf = ufSel.value; render(); });
+document.querySelectorAll('.seg').forEach(seg => seg.addEventListener('click', e => {
+  const b = e.target.closest('button'); if(!b) return;
+  seg.querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', x === b ? 'true' : 'false'));
+  state[seg.dataset.field] = b.dataset.v;
+  if(seg.dataset.field === 'ligacao') state.unsure = !!b.dataset.unsure;
+  render();
+}));
+function goToLead(){
+  if(unlocked()){ $('resultado').scrollIntoView({behavior:'smooth'}); return; }
+  $('resultado').scrollIntoView({behavior:'smooth'});
+  setTimeout(()=>document.querySelector('#leadForm input[name=nome]').focus({preventScroll:true}), 500);
+}
+$('simForm').addEventListener('submit', e => { e.preventDefault(); goToLead(); });
+$('rcUnlockBtn').addEventListener('click', goToLead);
+
+/* Fio B: gráfico da lei */
+(function(){
+  const anos = [2023,2024,2025,2026,2027,2028,2029], atual = new Date().getFullYear();
+  $('bars').innerHTML = anos.map(a => { const v = a===2029 ? 100 : FIOB[a]; const cls = a===atual ? 'now' : (a===atual+1 ? 'next' : '');
+    return `<div class="bar ${cls}"><em>${v}%</em><i style="height:${v*0.82}%"></i></div>`; }).join('');
+  $('barLabels').innerHTML = anos.map(a => `<span>${a===2029?'2029+':a}</span>`).join('');
+})();
+
+/* ---------- lead ---------- */
+function maskTel(v){ v = v.replace(/\D/g,'').slice(0,11); if(v.length>10) return v.replace(/(\d{2})(\d{5})(\d{0,4})/,'($1) $2-$3'); if(v.length>6) return v.replace(/(\d{2})(\d{4})(\d{0,4})/,'($1) $2-$3'); if(v.length>2) return v.replace(/(\d{2})(\d*)/,'($1) $2'); return v; }
+const lf = $('leadForm');
+lf.whatsapp.addEventListener('input', e => e.target.value = maskTel(e.target.value));
+function waLink(msg){ return `https://wa.me/${CONFIG.whatsapp}?text=${encodeURIComponent(msg)}`; }
+function leadMessage(l, r){
+  return `Olá, SUPERSUNN! Fiz a simulação no site e quero receber minha proposta.\n\n`+
+    `Nome: ${l.nome}\nCidade: ${l.cidade}/${state.uf}\nWhatsApp: ${l.whatsapp}${l.email?`\nE-mail: ${l.email}`:''}\n\n`+
+    `Conta de luz: ${brl(state.conta)}/mês\nImóvel: ${({casa:'Casa',comercio:'Comércio',rural:'Rural',industria:'Indústria'})[state.tipo]} · Ligação: ${state.unsure?'não sei':({mono:'monofásica',bi:'bifásica',tri:'trifásica'})[state.ligacao]}\n`+
+    `Sistema sugerido: ${r.kwp.toFixed(2).replace('.',',')} kWp\nEconomia estimada: ${brl(r.economia)}/mês (${Math.round(r.pct)}%)\nRetorno estimado: ${anosMeses(r.payback)}`;
+}
+lf.addEventListener('submit', e => {
+  e.preventDefault();
+  const l = { nome: lf.nome.value.trim(), whatsapp: lf.whatsapp.value.trim(), cidade: lf.cidade.value.trim(), email: lf.email.value.trim() };
+  let erro = '';
+  [lf.nome, lf.whatsapp, lf.cidade].forEach(i => i.classList.remove('err'));
+  if(l.nome.length < 2){ erro = 'Digite seu nome.'; lf.nome.classList.add('err'); }
+  else if(l.whatsapp.replace(/\D/g,'').length < 10){ erro = 'Digite um WhatsApp com DDD.'; lf.whatsapp.classList.add('err'); }
+  else if(l.cidade.length < 2){ erro = 'Digite sua cidade.'; lf.cidade.classList.add('err'); }
+  else if(l.email && !/^\S+@\S+\.\S+$/.test(l.email)){ erro = 'Confira o e-mail ou deixe em branco.'; lf.email.classList.add('err'); }
+  $('formErr').textContent = erro;
+  if(erro) return;
+  const r = state.result;
+  state.lead = l;
+  const payload = { ...l, uf: state.uf, contaMensal: state.conta, tipoImovel: state.tipo, ligacao: state.unsure ? 'nao_sei' : state.ligacao,
+    consumoKwh: Math.round(r.consumo), kwp: +r.kwp.toFixed(2), modulos: r.modulos, investimentoEstimado: Math.round(r.invest),
+    economiaMensal: Math.round(r.economia), economiaPct: Math.round(r.pct), paybackAnos: r.payback ? +r.payback.toFixed(1) : null,
+    economia25anos: Math.round(r.eco25), origem: 'landing-page', pagina: location.href.split('#')[0], criadoEm: new Date().toISOString(),
+    utm: Object.fromEntries(new URLSearchParams(location.search)) };
+  enviarLead(payload);
+  try{ if(window.fbq) fbq('track', 'Lead', {value: Math.round(r.invest), currency:'BRL'}); }catch(_){}
+  unlock(l);
+  $('resultado').scrollIntoView({behavior:'smooth'});
+});
+function unlock(l){
+  state.lead = l;
+  $('receipt').classList.remove('gated');
+  $('resLeft').classList.remove('locked');
+  $('resSub').textContent = `${l.nome.split(' ')[0]}, esta é a estimativa para o seu imóvel em ${l.cidade}/${state.uf}. Mude o valor da conta acima e os números se atualizam.`;
+  $('leadBox').style.display = 'none';
+  $('doneBox').classList.add('show');
+  $('waAlt').textContent = `Se o WhatsApp não abrir, chame a gente no ${CONFIG.telefoneExibicao}.`;
+  render();
+}
+
+/* envio do lead: Supabase (CRM + planilha + WhatsApp via gatilho no banco) e webhook opcional */
+function enviarLead(p){
+  const row = { nome:p.nome, whatsapp:p.whatsapp, email:p.email||null, cidade:p.cidade, uf:p.uf, conta_mensal:p.contaMensal,
+    tipo_imovel:p.tipoImovel, ligacao:p.ligacao, consumo_kwh:p.consumoKwh, kwp:p.kwp, modulos:p.modulos,
+    investimento_estimado:p.investimentoEstimado, economia_mensal:p.economiaMensal, economia_pct:p.economiaPct,
+    payback_anos:p.paybackAnos, economia_25anos:p.economia25anos, origem:'landing-supersunn', pagina:(p.pagina||'').slice(0,500),
+    utm: Object.keys(p.utm||{}).length ? p.utm : null };
+  if(CONFIG.supabaseUrl && CONFIG.supabaseKey){
+    try{
+      fetch(`${CONFIG.supabaseUrl}/rest/v1/leads`, { method:'POST', keepalive:true,
+        headers:{ 'apikey':CONFIG.supabaseKey, 'Authorization':'Bearer '+CONFIG.supabaseKey, 'Content-Type':'application/json', 'Prefer':'return=minimal' },
+        body: JSON.stringify(row) }).catch(()=>{});
+    }catch(_){}
+  }
+  if(CONFIG.leadWebhook){ try{ fetch(CONFIG.leadWebhook, {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(p), keepalive:true}).catch(()=>{}); }catch(_){} }
+}
+
+/* contatos e WhatsApp geral */
+const waGeral = waLink('Olá, SUPERSUNN! Quero saber mais sobre energia solar.');
+['ctaWa','waFloat'].forEach(id => $(id).href = waGeral);
+$('contactList').innerHTML = [
+  `<li><a href="${waGeral}" target="_blank" rel="noopener">WhatsApp ${CONFIG.telefoneExibicao}</a></li>`,
+  CONFIG.email ? `<li>${CONFIG.email}</li>` : '', CONFIG.instagram ? `<li>Instagram ${CONFIG.instagram}</li>` : ''].join('');
+$('copyLine').textContent = `© ${new Date().getFullYear()} SUPERSUNN Energia Solar${CONFIG.cnpj ? ' · CNPJ ' + CONFIG.cnpj : ''}. Valores do simulador são estimativas e não constituem proposta comercial.`;
+
+/* Pixel da Meta (só carrega se o ID estiver configurado) */
+if(CONFIG.metaPixelId){
+  !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');
+  fbq('init', CONFIG.metaPixelId); fbq('track', 'PageView');
+}
+
+syncRange(); render();
+/* a simulação começa bloqueada a cada abertura da página; apaga o desbloqueio salvo por versões antigas */
+try{ localStorage.removeItem('supersunn_lead'); }catch(_){}
+/* voltar para a página pelo botão do navegador também recarrega (não reaproveita a simulação liberada) */
+window.addEventListener('pageshow', e=>{ if(e.persisted) location.reload(); });
+</script>
+</body>
+</html>
