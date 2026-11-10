@@ -186,6 +186,16 @@ select.form-mode{border:1.5px solid var(--navy);}
 .tag-chip{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;padding:4px 10px;border-radius:20px;cursor:pointer;border:1.5px solid var(--line);background:#fff;margin:0 6px 6px 0;}
 .tag-chip.active{border-color:transparent;}
 .tag-chip .dot{width:9px;height:9px;border-radius:50%;flex:none;}
+.etapa-pill{display:inline-flex;align-items:center;gap:6px;max-width:100%;font:inherit;font-size:12px;font-weight:700;padding:5px 11px;border-radius:16px;border:1.5px solid;cursor:pointer;white-space:normal;text-align:left;line-height:1.25;transition:filter .12s;}
+.etapa-pill:hover{filter:brightness(.95);}
+.etapa-pill:focus-visible,.etapa-filtro:focus-visible{outline:2px solid var(--cyan);outline-offset:2px;}
+.etapa-pill .dot{width:8px;height:8px;border-radius:50%;flex:none;}
+.etapa-filtros{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:12px 0 10px;}
+.etapa-filtros .lbl{font-size:12px;font-weight:700;color:var(--muted);margin-right:2px;}
+.etapa-filtro{font:inherit;font-size:12px;font-weight:600;padding:4px 11px;border-radius:20px;border:1.5px solid var(--line);background:#fff;color:var(--navy-dark);cursor:pointer;}
+.etapa-filtro b{font-weight:800;margin-left:3px;}
+.etapa-filtro.on.all{background:var(--navy);color:#fff;border-color:var(--navy);}
+:root[data-theme="dark"] .etapa-filtro{background:var(--card);}
 .tag-swatch{width:16px;height:16px;border-radius:4px;flex:none;display:inline-block;vertical-align:middle;border:1px solid rgba(0,0,0,.1);}
 .tag-manage-row{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px dashed var(--line);}
 .tag-manage-row .grow{flex:1;font-size:13px;font-weight:600;}
@@ -1413,14 +1423,14 @@ async function handleImportBackup(e){
 /* ---------- exportações .xlsx por seção ---------- */
 window.exportClientesXlsx = ()=>{
   if(!STATE.clients.length){ toast('Nenhum cliente para exportar.'); return; }
-  const header = ["Nome","CPF/CNPJ","Telefone","E-mail","Endereço","Número","Bairro","CEP","Cidade","UF","Concessionária","Classe","Tarifa (R$/kWh)","Disponibilidade (kWh)","Cadastrado por","Última alteração por"];
+  const header = ["Nome","CPF/CNPJ","Telefone","E-mail","Etapa no funil","Endereço","Número","Bairro","CEP","Cidade","UF","Concessionária","Classe","Tarifa (R$/kWh)","Disponibilidade (kWh)","Cadastrado por","Última alteração por"];
   const rows = STATE.clients.map(c=>[
-    c.nome||'', c.cpf||'', c.telefone||'', c.email||'', c.endereco||'', c.numero||'', c.bairro||'',
+    c.nome||'', c.cpf||'', c.telefone||'', c.email||'', (etapaDoCliente(c.id)||{nome:'Fora do funil'}).nome, c.endereco||'', c.numero||'', c.bairro||'',
     c.cep||'', c.cidade||'', c.uf||'', c.concessionaria||'', c.classe||'', c.tarifa||'', c.disponibilidade||'',
     c.createdBy||'', c.updatedBy||''
   ]);
   downloadXlsx([header, ...rows],
-    [{wch:26},{wch:18},{wch:16},{wch:26},{wch:26},{wch:8},{wch:18},{wch:14},{wch:18},{wch:5},{wch:16},{wch:22},{wch:14},{wch:16},{wch:26},{wch:26}],
+    [{wch:26},{wch:18},{wch:16},{wch:26},{wch:20},{wch:26},{wch:8},{wch:18},{wch:14},{wch:18},{wch:5},{wch:16},{wch:22},{wch:14},{wch:16},{wch:26},{wch:26}],
     'Clientes', `clientes_${timestampForFilename()}.xlsx`);
   toast('Clientes exportados.');
 };
@@ -1635,6 +1645,37 @@ function dashFilterBar(tab){
 }
 function propostasVisiveis(){ const l = STATE.proposals.slice().reverse(); return (DASH_FILTER && DASH_FILTER.tab==='propostas') ? l.filter(DASH_FILTER.fn) : l; }
 function clientesVisiveis(){ return (DASH_FILTER && DASH_FILTER.tab==='clientes') ? STATE.clients.filter(DASH_FILTER.fn) : STATE.clients; }
+/* etapa do funil de cada cliente (pelo card dele) */
+function etapaDoCliente(clientId){
+  const card = STATE.funnelCards.find(c=>c.clientId===clientId);
+  if(!card) return null;
+  return STATE.funnelStages.find(s=>s.id===card.stageId) || null;
+}
+function etapaCor(st){
+  if(!st) return {bg:'#EEF1F5',fg:'#6B7689',bd:'#DDE3EC'};
+  const n = st.nome||'';
+  if(/perd/i.test(n))            return {bg:'#FDECEC',fg:'#B42318',bd:'#F6C9C5'};
+  if(/fechad|ganh/i.test(n))     return {bg:'#E7F6EC',fg:'#16794A',bd:'#BFE6CD'};
+  if(/negoci/i.test(n))          return {bg:'#FFF6DB',fg:'#9A6700',bd:'#F5DF9C'};
+  if(/proposta/i.test(n))        return {bg:'#FFF1E3',fg:'#C25700',bd:'#FFD3A8'};
+  if(/contato/i.test(n))         return {bg:'#E8F1FF',fg:'#1D5BBF',bd:'#C6DAFA'};
+  if(/novo|lead/i.test(n))       return {bg:'#EEF0FB',fg:'#0B1F4B',bd:'#D3D8F0'};
+  return {bg:'#F1F3F7',fg:'#344054',bd:'#DDE3EC'};
+}
+function etapaPillHtml(c){
+  const st = etapaDoCliente(c.id), k = etapaCor(st);
+  const nome = st ? st.nome : 'Fora do funil';
+  return `<button type="button" class="etapa-pill" title="${st?'Abrir card no funil':'Criar card no funil'}" onclick="abrirCardCliente('${c.id}')"
+    style="background:${k.bg};color:${k.fg};border-color:${k.bd}"><span class="dot" style="background:${k.fg}"></span>${esc(nome)}</button>`;
+}
+let CLI_ETAPA_FILTRO = '';
+window.setCliEtapaFiltro = (v)=>{ CLI_ETAPA_FILTRO = v; renderMain(); };
+function clientesListados(){
+  const base = clientesVisiveis();
+  if(!CLI_ETAPA_FILTRO) return base;
+  if(CLI_ETAPA_FILTRO==='__sem') return base.filter(c=>!etapaDoCliente(c.id));
+  return base.filter(c=>{ const st = etapaDoCliente(c.id); return st && st.id===CLI_ETAPA_FILTRO; });
+}
 window.goHome = ()=>{ DASH_FILTER = null; ACTIVE_TAB='dashboard'; renderMain(); window.scrollTo({top:0}); };
 window.goToTab = (tabId)=>{ DASH_FILTER = null; ACTIVE_TAB=tabId; renderMain(); window.scrollTo({top:0,behavior:'smooth'}); };
 
@@ -2699,10 +2740,11 @@ function focusOpenModalIfAny(){
 let editingClientId = null;
 
 function viewClientes(){
-  const rows = clientesVisiveis().map(c=>`
+  const rows = clientesListados().map(c=>`
     <tr>
       <td><b>${esc(c.nome)}</b><br><span style="color:var(--muted);font-size:11.5px">${esc(c.cpf||'CPF não informado')} — ${esc(c.cidade||'')}/${esc(c.uf||'')}</span></td>
       <td>${esc(c.telefone||'-')}<br><span style="color:var(--muted);font-size:11.5px">${esc(c.email||'')}</span></td>
+      <td>${etapaPillHtml(c)}</td>
       <td>${esc(c.concessionaria||'-')}</td>
       <td>${esc(c.classe||'-')}</td>
       <td>${c.tarifa?('R$ '+esc(c.tarifa)+'/kWh'):'-'}<br><span style="color:var(--muted);font-size:11.5px">Disp. ${esc(c.disponibilidade||'-')} kWh</span></td>
@@ -2756,14 +2798,25 @@ function viewClientes(){
 
   <div class="card">
     <div class="row" style="align-items:center;justify-content:space-between">
-      <h2 style="margin:0">Clientes cadastrados (${clientesVisiveis().length}${DASH_FILTER&&DASH_FILTER.tab==='clientes'?' de '+STATE.clients.length:''})</h2>
+      <h2 style="margin:0">Clientes cadastrados (${clientesListados().length}${(DASH_FILTER&&DASH_FILTER.tab==='clientes')||CLI_ETAPA_FILTRO?' de '+STATE.clients.length:''})</h2>
       ${STATE.clients.length? `<button class="btn btn-outline btn-sm" onclick="exportClientesXlsx()">Exportar (.xlsx)</button>`:''}
     </div>
     ${dashFilterBar('clientes')}
-    ${clientesVisiveis().length? `<div style="overflow:auto;max-height:460px">
-      <table style="table-layout:fixed"><thead><tr><th style="width:23%">Cliente</th><th style="width:19%">Contato</th><th style="width:13%">Concessionária</th><th style="width:13%">Classe</th><th style="width:12%">Tarifa / Disp.</th><th style="width:20%"></th></tr></thead>
+    ${STATE.clients.length? (()=>{
+      const cont = {}; let sem = 0;
+      clientesVisiveis().forEach(c=>{ const st = etapaDoCliente(c.id); if(st) cont[st.id]=(cont[st.id]||0)+1; else sem++; });
+      const chip = (id,nome,n,st)=>{ const k = etapaCor(st); const on = CLI_ETAPA_FILTRO===id;
+        return `<button type="button" class="etapa-filtro${on?' on':''}" onclick="setCliEtapaFiltro('${on?'':id}')"
+          style="${on?`background:${k.fg};color:#fff;border-color:${k.fg}`:`background:${k.bg};color:${k.fg};border-color:${k.bd}`}">${esc(nome)} <b>${n}</b></button>`; };
+      return `<div class="etapa-filtros"><span class="lbl">Etapa no funil:</span>
+        <button type="button" class="etapa-filtro${CLI_ETAPA_FILTRO?'':' on all'}" onclick="setCliEtapaFiltro('')">Todas <b>${clientesVisiveis().length}</b></button>
+        ${STATE.funnelStages.map(st=>chip(st.id, st.nome, cont[st.id]||0, st)).join('')}
+        ${sem? chip('__sem','Fora do funil',sem,null) : ''}</div>`; })() : ''}
+    ${clientesListados().length? `<div style="overflow:auto;max-height:460px">
+      <table style="table-layout:fixed"><thead><tr><th style="width:19%">Cliente</th><th style="width:15%">Contato</th><th style="width:16%">Etapa no funil</th><th style="width:11%">Concessionária</th><th style="width:11%">Classe</th><th style="width:10%">Tarifa / Disp.</th><th style="width:18%"></th></tr></thead>
       <tbody>${rows}</tbody></table></div>`
-      : `<div class="empty"><b>Nenhum cliente cadastrado ainda</b>Cadastre o primeiro cliente acima para começar a gerar propostas.</div>`}
+      : (STATE.clients.length && CLI_ETAPA_FILTRO ? `<div class="empty"><b>Nenhum cliente nesta etapa</b>Escolha outra etapa ou clique em "Todas".</div>`
+      : `<div class="empty"><b>Nenhum cliente cadastrado ainda</b>Cadastre o primeiro cliente acima para começar a gerar propostas.</div>`)}
   </div>`;
 }
 
