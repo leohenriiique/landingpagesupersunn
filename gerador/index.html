@@ -201,6 +201,49 @@ select.form-mode{border:1.5px solid var(--navy);}
 .tag-manage-row .grow{flex:1;font-size:13px;font-weight:600;}
 .funnel-add-col{min-width:220px;max-width:220px;flex:none;}
 .funnel-add-col input{width:100%;border:1.5px dashed var(--line);border-radius:10px;padding:9px 10px;font-size:12.5px;background:#fff;}
+
+/* ---- Projeto no telhado ---- */
+.th-overlay{position:fixed;inset:0;z-index:1000;background:rgba(8,16,40,.55);display:flex;align-items:center;justify-content:center;padding:16px;}
+.th-box{background:var(--card,#fff);color:var(--ink);border-radius:16px;width:min(1320px,100%);height:min(880px,100%);display:flex;flex-direction:column;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.35);}
+.th-head{display:flex;align-items:center;justify-content:space-between;padding:12px 18px;border-bottom:1px solid var(--line);}
+.th-head b{font-size:16px;color:var(--navy-dark);}
+.th-head span{margin-left:10px;color:var(--muted);font-size:13px;}
+.th-head .modal-close{float:none;font-size:26px;}
+.th-main{flex:1;display:flex;min-height:0;}
+.th-stage{flex:1;position:relative;background:#141a26;min-width:0;overflow:hidden;}
+.th-map,.th-stage canvas{position:absolute;inset:0;width:100%;height:100%;}
+.th-stage canvas{touch-action:none;cursor:grab;}
+.th-stage canvas.mov{cursor:grabbing;}
+.th-cross{position:absolute;left:50%;top:50%;width:46px;height:46px;margin:-23px 0 0 -23px;pointer-events:none;border:2px solid #FF7A00;border-radius:50%;box-shadow:0 0 0 2px rgba(0,0,0,.35);}
+.th-cross::before,.th-cross::after{content:'';position:absolute;background:#FF7A00;}
+.th-cross::before{left:50%;top:-12px;bottom:-12px;width:2px;margin-left:-1px;}
+.th-cross::after{top:50%;left:-12px;right:-12px;height:2px;margin-top:-1px;}
+.th-zoom{position:absolute;right:12px;top:72px;display:flex;flex-direction:column;gap:6px;}
+.th-zoom[hidden]{display:none;}
+.th-zoom button{width:38px;height:38px;border-radius:10px;border:0;background:#fff;color:#0B1F4B;font-size:19px;font-weight:700;box-shadow:0 2px 8px rgba(0,0,0,.3);cursor:pointer;}
+.th-zoom button:focus-visible{outline:3px solid #FF7A00;outline-offset:2px;}
+.th-msg{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);max-width:440px;background:rgba(255,255,255,.97);color:#0B1F4B;padding:16px 18px;border-radius:12px;font-size:13.5px;line-height:1.45;text-align:center;box-shadow:0 6px 24px rgba(0,0,0,.3);}
+.th-side{width:320px;flex:0 0 320px;overflow:auto;padding:14px 16px;border-left:1px solid var(--line);}
+.th-sec{padding-bottom:14px;margin-bottom:14px;border-bottom:1px solid var(--line);}
+.th-sec h4{margin:0 0 8px;font-size:13.5px;color:var(--navy-dark);}
+.th-sec .row{gap:8px;}
+.th-sec input[type=range]{width:100%;accent-color:#FF7A00;}
+.th-count{font-size:13px;font-weight:700;padding:8px 10px;border-radius:9px;background:var(--cyan-light);color:var(--navy-dark);margin-bottom:10px;}
+.th-count.ok{background:rgba(21,146,79,.13);color:var(--good);}
+.th-count.over{background:rgba(220,38,38,.1);color:#c62828;}
+.th-dicas{font-size:11.5px;line-height:1.5;}
+.th-foot{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 18px;border-top:1px solid var(--line);font-size:13px;color:var(--muted);}
+.th-foot>div{display:flex;gap:8px;}
+.th-resumo{margin:4px 0 12px;font-size:13.5px;}
+@media(max-width:820px){
+  .th-overlay{padding:0;}
+  .th-box{border-radius:0;height:100%;}
+  .th-main{flex-direction:column;}
+  .th-side{width:auto;flex:0 0 auto;max-height:42%;border-left:0;border-top:1px solid var(--line);}
+  .th-foot{flex-wrap:wrap;}
+}
+.ss-roof img{display:block;width:100%;border-radius:14px;}
+
 .modal-overlay{position:fixed;inset:0;background:rgba(10,30,40,.45);display:flex;align-items:center;justify-content:center;z-index:900;padding:20px;}
 .modal-box{background:#fff;border-radius:14px;max-width:520px;width:100%;max-height:85vh;overflow:auto;padding:22px 24px;box-shadow:0 10px 40px rgba(0,0,0,.3);}
 .modal-box h3{margin:0 0 4px;color:var(--navy-dark);font-size:17px;}
@@ -3864,6 +3907,7 @@ function viewConfiguracoes(){
       ${accordionItem('irradiacao', 'Irradiação Solar', viewIrradiacao())}
       ${accordionItem('contratada', 'Dados da Contratada', viewContratada())}
       ${accordionItem('drive', 'Google Drive (documentos dos clientes)', viewDriveConfig())}
+      ${accordionItem('gmaps', 'Google Maps (projeto no telhado)', viewGmapsConfig())}
     </div>
   </div>`;
 }
@@ -4257,6 +4301,8 @@ function stepKit(){
     </div>
   </div>
 
+  ${telhadoCardHtml()}
+
   <div class="card">
     <h2>Obra de adequação de padrão</h2>
     <div class="sub">Marque se a instalação exige uma obra de adequação do padrão de entrada de energia.</div>
@@ -4631,7 +4677,8 @@ function computeCurrentProposal(){
 
   const calc = {
     client, consumoMensalArr, consumoMedia, irr, kwp, descricao: descricaoFinal, valor, nomeKit,
-    geracaoMensalArr, geracaoMediaMensal, investimento, adequacaoPadrao, pr, contratoEquip: WIZ.contratoEquip
+    geracaoMensalArr, geracaoMediaMensal, investimento, adequacaoPadrao, pr, contratoEquip: WIZ.contratoEquip,
+    telhado: telhadoContagem(WIZ.telhado) ? WIZ.telhado : null
   };
   calc.finInputs = finInputsFrom(WIZ.fin, client);
   calc.fin = computeFin(calc, calc.finInputs, new Date());
@@ -4700,6 +4747,7 @@ function buildProposalRecord(calc, pagamento){
     finResumo: calc.fin ? { economiaPct: calc.fin.economiaPct, economiaMensal: calc.fin.economiaMensal, payback: calc.fin.payback,
       economiaTotal: calc.fin.economiaTotal, tir: calc.fin.tir, roi: calc.fin.roi } : null,
     contratoEquip: WIZ.contratoEquip,
+    telhado: calc.telhado || null,
     pagamento,
     status: 'Enviada', versionOf: null, versionNumber: 1
   });
@@ -4749,6 +4797,7 @@ function viewPropostas(){
       </td>
       <td class="actions-col">
         <button class="btn btn-outline btn-sm" onclick="regeneratePdf('${p.id}', this)">Baixar PDF</button>
+        <button class="btn btn-outline btn-sm" onclick="editarTelhadoProposta('${p.id}')" title="Layout das placas sobre a imagem de satélite">${p.telhado?'Telhado ✓':'Telhado'}</button>
         <button class="btn btn-outline btn-sm" onclick="gerarContratoDe('${p.id}')">Gerar contrato</button>
         <button class="btn btn-outline btn-sm" onclick="gerarProcuracaoDe('${p.clientId}')">Gerar procuração</button>
         <button class="btn btn-outline btn-sm" onclick="criarNovaVersaoProposta('${p.id}')">Nova versão</button>
@@ -4832,7 +4881,7 @@ window.regeneratePdf = async(id, btn)=>{
       kwp:p.kwp, descricao:p.descricao, nomeKit:p.nomeKit, valor:p.valor,
       geracaoMensalArr:p.geracaoMensalArr, geracaoMediaMensal:p.geracaoMediaMensal,
       investimento: p.pagamento ? p.pagamento.vista : (p.investimento || p.valor),
-      pr: p.pr, contratoEquip: p.contratoEquip || {},
+      pr: p.pr, contratoEquip: p.contratoEquip || {}, telhado: p.telhado || null,
       numero: p.numero || '—', dataEmissao: p.dataEmissao || p.createdAt, consultor: p.consultor || ''
     };
     calc.finInputs = p.finInputs || finInputsFrom({}, client);
@@ -4913,6 +4962,11 @@ async function buildAndDownloadPdf(calc, pagamento){
     }
 
     toast('Gerando PDF, aguarde...');
+    calc.telhadoImg = null;
+    if(calc.telhado && telhadoContagem(calc.telhado)){
+      try{ calc.telhadoImg = await telhadoExportar(calc.telhado); }
+      catch(e){ console.error('telhado', e); toast('Não consegui carregar a imagem do telhado (' + e.message + '). O PDF sai sem essa página.'); }
+    }
     area.innerHTML = pdfPagesHtml(calc, pagamento);
 
     await waitFontsReady(2500);
@@ -5307,6 +5361,671 @@ function swooshCoverImg(){
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 794 300" width="794" height="300" preserveAspectRatio="none"><defs><linearGradient id="o" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#FFC400"/><stop offset="1" stop-color="#FF7A00"/></linearGradient></defs><path d="M0 205 C250 185 540 125 794 0 L794 26 C556 145 290 205 0 228 Z" fill="#FFC400"/><path d="M0 300 L0 245 C290 222 576 150 794 50 L794 300 Z" fill="url(#o)"/></svg>`;
   return 'data:image/svg+xml;base64,' + btoa(svg);
 }
+
+/* =========================================================================
+   PROJETO NO TELHADO — layout das placas, em escala, sobre a imagem de satélite.
+   • Maps JavaScript API: mapa para achar o imóvel (e Geocoding para o endereço)
+   • Maps Static API: imagem de satélite (norte para cima) onde as placas são desenhadas
+   A imagem NÃO é guardada: a proposta guarda só o local e a posição das placas
+   (em metros); a imagem é buscada de novo ao abrir o editor ou gerar o PDF.
+   ========================================================================= */
+const TH_IMG = 1280;                                   // lado da imagem estática (640 px × scale 2)
+const TH_PAD = { modC:2.38, modL:1.134, esp:0.02, zoom:20 };
+let TH = null;
+function gmapsKey(){ return ((STATE.proposalSettings||{}).gmapsKey||'').trim(); }
+/* metros por pixel da imagem estática (projeção Web Mercator, scale 2) */
+function thMpp(lat, zoom){ return 156543.03392*Math.cos(lat*Math.PI/180)/Math.pow(2, zoom)/2; }
+function telhadoContagem(t){ return (t && t.blocos || []).reduce((s,b)=>s + b.lin*b.col - (b.off||[]).filter(i=>i<b.lin*b.col).length, 0); }
+function thPainel(t, b){ const C=+t.modC||TH_PAD.modC, L=+t.modL||TH_PAD.modL; return b.ori==='paisagem' ? {w:C, h:L} : {w:L, h:C}; }
+function thDim(t, b){ const p=thPainel(t,b), e=(t.esp===undefined||t.esp==='')?TH_PAD.esp:+t.esp; return {...p, e, W:b.col*p.w+(b.col-1)*e, H:b.lin*p.h+(b.lin-1)*e}; }
+/* centro de cada placa (metros, relativo ao centro do bloco, antes do giro) */
+function thPaineisDoBloco(t, b){
+  const d = thDim(t,b), off = new Set(b.off||[]), ps = [];
+  for(let r=0;r<b.lin;r++) for(let c=0;c<b.col;c++){
+    const i = r*b.col+c;
+    ps.push({ i, on:!off.has(i), x:-d.W/2 + c*(d.w+d.e) + d.w/2, y:-d.H/2 + r*(d.h+d.e) + d.h/2 });
+  }
+  return { d, ps };
+}
+const thRot = (x,y,a)=>{ const c=Math.cos(a), s=Math.sin(a); return { x:x*c-y*s, y:x*s+y*c }; };
+function thEnderecoCliente(c){
+  c = c || {};
+  return [[c.endereco, c.numero].filter(Boolean).join(', '), c.bairro, c.cidade ? c.cidade+(c.uf?' - '+c.uf:'') : ''].filter(Boolean).join(', ');
+}
+
+/* ---------- imagem de satélite ---------- */
+const TH_CACHE = new Map();
+function thUrlImagem(t, tam){
+  return `https://maps.googleapis.com/maps/api/staticmap?center=${t.lat},${t.lng}&zoom=${t.zoom}&size=${tam||'640x640'}&scale=2&maptype=satellite&key=${encodeURIComponent(gmapsKey())}`;
+}
+function thCarregarImagem(t){
+  if(!gmapsKey()) return Promise.reject(new Error('Cadastre a chave do Google Maps em Configurações → Google Maps.'));
+  const url = thUrlImagem(t);
+  if(TH_CACHE.has(url)) return TH_CACHE.get(url);
+  const p = (async()=>{
+    let r;
+    try{ r = await fetch(url); }catch(e){ throw new Error('Sem conexão com o Google Maps.'); }
+    if(!r.ok){
+      const txt = (await r.text().catch(()=>'')).slice(0,180);
+      throw new Error(`O Google recusou a imagem de satélite (${r.status}). Confira se a "Maps Static API" está ativada e se este site está liberado na chave. ${txt}`);
+    }
+    const img = new Image();
+    img.src = URL.createObjectURL(await r.blob());
+    await img.decode();
+    return img;
+  })();
+  TH_CACHE.set(url, p);
+  p.catch(()=>TH_CACHE.delete(url));
+  return p;
+}
+
+/* ---------- Maps JavaScript API (só para localizar o imóvel) ---------- */
+let __gmP = null;
+function carregarGoogleMaps(){
+  if(!gmapsKey()) return Promise.reject(new Error('Cadastre a chave do Google Maps em Configurações → Google Maps.'));
+  if(window.google && google.maps && google.maps.importLibrary) return Promise.resolve();
+  if(__gmP) return __gmP;
+  __gmP = new Promise((res, rej)=>{
+    window.__gmReady = ()=>res();
+    window.gm_authFailure = ()=>thMsg('O Google Maps recusou a chave. Confira se a "Maps JavaScript API" está ativada e se este site está liberado na chave (Configurações → Google Maps).');
+    const s = document.createElement('script');
+    s.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(gmapsKey())}&v=weekly&loading=async&callback=__gmReady`;
+    s.async = true;
+    s.onerror = ()=>{ __gmP = null; rej(new Error('Não consegui carregar o Google Maps (sem internet?).')); };
+    document.head.appendChild(s);
+  });
+  return __gmP;
+}
+
+/* ---------- desenho (editor e PDF usam a mesma função) ----------
+   v = { s, ox, oy }: pixel da imagem → pixel do canvas  (cx = ox + imgX·s) */
+function thDesenhar(ctx, t, img, v, op){
+  op = op || {};
+  const k = 1/thMpp(t.lat, t.zoom), pxm = k*v.s;
+  ctx.save();
+  ctx.fillStyle = '#1a1f2b'; ctx.fillRect(0,0,ctx.canvas.width,ctx.canvas.height);
+  if(img) ctx.drawImage(img, v.ox, v.oy, TH_IMG*v.s, TH_IMG*v.s);
+  (t.blocos||[]).forEach((b, bi)=>{
+    const { d, ps } = thPaineisDoBloco(t, b);
+    ctx.save();
+    ctx.translate(v.ox + (TH_IMG/2 + b.x*k)*v.s, v.oy + (TH_IMG/2 + b.y*k)*v.s);
+    ctx.rotate((b.rot||0)*Math.PI/180);
+    const w = d.w*pxm, h = d.h*pxm;
+    ps.forEach(p=>{
+      const x = p.x*pxm - w/2, y = p.y*pxm - h/2;
+      if(!p.on){
+        if(op.editar){ ctx.setLineDash([4,3]); ctx.strokeStyle='rgba(255,255,255,.6)'; ctx.lineWidth=1; ctx.strokeRect(x,y,w,h); ctx.setLineDash([]); }
+        return;
+      }
+      const g = ctx.createLinearGradient(x,y,x+w,y+h);
+      g.addColorStop(0,'#2a4a8f'); g.addColorStop(1,'#0d1c45');
+      ctx.fillStyle = g; ctx.fillRect(x,y,w,h);
+      if(w > 14){                                  // células do módulo (meia-célula 6 × 10)
+        const nx = b.ori==='paisagem'?10:6, ny = b.ori==='paisagem'?6:10;
+        ctx.strokeStyle = 'rgba(190,210,255,.25)'; ctx.lineWidth = Math.max(.5, pxm*.012);
+        ctx.beginPath();
+        for(let a=1;a<nx;a++){ ctx.moveTo(x+w*a/nx, y); ctx.lineTo(x+w*a/nx, y+h); }
+        for(let a=1;a<ny;a++){ ctx.moveTo(x, y+h*a/ny); ctx.lineTo(x+w, y+h*a/ny); }
+        ctx.stroke();
+      }
+      ctx.strokeStyle = '#dfe7f5'; ctx.lineWidth = Math.max(1, pxm*.035); ctx.strokeRect(x,y,w,h);
+    });
+    if(op.sel === bi){
+      const W2 = d.W*pxm/2, H2 = d.H*pxm/2;
+      ctx.strokeStyle = '#FF7A00'; ctx.lineWidth = 2; ctx.setLineDash([6,4]);
+      ctx.strokeRect(-W2-5, -H2-5, W2*2+10, H2*2+10); ctx.setLineDash([]);
+      ctx.beginPath(); ctx.moveTo(0, -H2-5); ctx.lineTo(0, -H2-30); ctx.stroke();
+      ctx.beginPath(); ctx.arc(0, -H2-30, 9, 0, Math.PI*2); ctx.fillStyle = '#FF7A00'; ctx.fill();
+      ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.stroke();
+    }
+    ctx.restore();
+  });
+  ctx.restore();
+}
+/* barra de escala, norte e créditos da imagem */
+function thMarcas(ctx, W, H, pxm, u){
+  u = u || 1;
+  ctx.save();
+  const opc = [1,2,5,10,20,50];
+  let L = opc[0]; for(const o of opc){ if(o*pxm <= W*0.22) L = o; }
+  const bw = L*pxm, x0 = 18*u, y0 = H - 22*u;
+  ctx.fillStyle = 'rgba(0,0,0,.45)'; ctx.fillRect(x0-8*u, y0-30*u, bw+16*u+60*u, 40*u);
+  ctx.fillStyle = '#fff'; ctx.fillRect(x0, y0-6*u, bw, 6*u);
+  ctx.fillRect(x0, y0-12*u, 2*u, 12*u); ctx.fillRect(x0+bw-2*u, y0-12*u, 2*u, 12*u);
+  ctx.font = `700 ${14*u}px Montserrat, Arial, sans-serif`; ctx.textBaseline = 'alphabetic';
+  ctx.fillText(L+' m', x0+bw+8*u, y0);
+  // norte
+  const nx = W - 34*u, ny = 36*u;
+  ctx.beginPath(); ctx.arc(nx, ny, 20*u, 0, Math.PI*2); ctx.fillStyle = 'rgba(0,0,0,.45)'; ctx.fill();
+  ctx.beginPath(); ctx.moveTo(nx, ny-15*u); ctx.lineTo(nx+7*u, ny+2*u); ctx.lineTo(nx-7*u, ny+2*u); ctx.closePath(); ctx.fillStyle = '#FF7A00'; ctx.fill();
+  ctx.fillStyle = '#fff'; ctx.font = `800 ${11*u}px Montserrat, Arial, sans-serif`; ctx.textAlign = 'center'; ctx.fillText('N', nx, ny+15*u);
+  // créditos
+  ctx.textAlign = 'right'; ctx.font = `600 ${11*u}px Montserrat, Arial, sans-serif`;
+  ctx.shadowColor = 'rgba(0,0,0,.8)'; ctx.shadowBlur = 4*u;
+  ctx.fillText('Imagem de satélite © Google', W - 12*u, H - 10*u);
+  ctx.restore();
+}
+/* imagem final (JPEG) recortada em volta das placas, para o PDF */
+async function telhadoExportar(t){
+  const img = await thCarregarImagem(t);
+  const k = 1/thMpp(t.lat, t.zoom);
+  let x0=Infinity, y0=Infinity, x1=-Infinity, y1=-Infinity;
+  (t.blocos||[]).forEach(b=>{
+    const { d, ps } = thPaineisDoBloco(t, b), a = (b.rot||0)*Math.PI/180;
+    ps.filter(p=>p.on).forEach(p=>[[-1,-1],[1,-1],[1,1],[-1,1]].forEach(([sx,sy])=>{
+      const q = thRot(p.x+sx*d.w/2, p.y+sy*d.h/2, a);
+      x0 = Math.min(x0, b.x+q.x); x1 = Math.max(x1, b.x+q.x); y0 = Math.min(y0, b.y+q.y); y1 = Math.max(y1, b.y+q.y);
+    }));
+  });
+  if(!isFinite(x0)) throw new Error('Nenhuma placa no layout.');
+  const W = 1600, H = 1380, ext = TH_IMG/k;
+  let wm = Math.max((x1-x0)*1.9+8, ((y1-y0)*1.9+6)*W/H, 26);
+  wm = Math.min(wm, ext);
+  const hm = wm*H/W, lim = ext/2;
+  const cx = Math.max(-lim+wm/2, Math.min(lim-wm/2, (x0+x1)/2));
+  const cy = Math.max(-lim+hm/2, Math.min(lim-hm/2, (y0+y1)/2));
+  const cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+  const ctx = cv.getContext('2d'); ctx.imageSmoothingQuality = 'high';
+  const s = W/(wm*k);
+  thDesenhar(ctx, t, img, { s, ox: W/2 - (TH_IMG/2 + cx*k)*s, oy: H/2 - (TH_IMG/2 + cy*k)*s }, {});
+  thMarcas(ctx, W, H, k*s, 2);
+  return cv.toDataURL('image/jpeg', 0.9);
+}
+
+/* ---------- editor (janela em tela cheia) ---------- */
+function thAbrir(t0, opts){
+  if(TH) thFechar(true);
+  const ps = STATE.proposalSettings || {};
+  const t = JSON.parse(JSON.stringify(t0 || {}));
+  t.blocos = t.blocos || [];
+  t.modC = +t.modC || +ps.telhadoModC || TH_PAD.modC;
+  t.modL = +t.modL || +ps.telhadoModL || TH_PAD.modL;
+  if(t.esp===undefined) t.esp = TH_PAD.esp;
+  t.zoom = t.zoom || TH_PAD.zoom;
+  TH = { t, opts: opts||{}, img:null, sel: t.blocos.length?0:-1, drag:null, v:null, map:null, modo:'', mudou:false };
+  const el = document.createElement('div');
+  el.id = 'th-modal'; el.className = 'th-overlay';
+  el.innerHTML = `<div class="th-box" role="dialog" aria-modal="true" aria-label="Projeto no telhado">
+    <div class="th-head"><div><b>Projeto no telhado</b><span>${esc(TH.opts.titulo||'')}</span></div>
+      <button class="modal-close" onclick="thFechar()" aria-label="Fechar">&times;</button></div>
+    <div class="th-main">
+      <div class="th-stage" id="th-stage">
+        <div id="th-map" class="th-map"></div>
+        <div class="th-cross" id="th-cross" aria-hidden="true"></div>
+        <canvas id="th-canvas" hidden></canvas>
+        <div class="th-zoom" id="th-zoom" hidden>
+          <button type="button" onclick="thZoomVista(1.3)" aria-label="Aproximar">+</button>
+          <button type="button" onclick="thZoomVista(1/1.3)" aria-label="Afastar">−</button>
+          <button type="button" onclick="thEnquadrar()" aria-label="Enquadrar as placas" title="Enquadrar as placas">⤢</button>
+        </div>
+        <div class="th-msg" id="th-msg" hidden></div>
+      </div>
+      <aside class="th-side" id="th-side"></aside>
+    </div>
+    <div class="th-foot"><span id="th-cont"></span>
+      <div><button class="btn btn-outline" onclick="thFechar()">Cancelar</button><button class="btn btn-primary" onclick="thSalvar()">Salvar layout</button></div></div>
+  </div>`;
+  document.body.appendChild(el);
+  document.body.style.overflow = 'hidden';
+  document.addEventListener('keydown', thTecla);
+  const cv = document.getElementById('th-canvas');
+  cv.addEventListener('pointerdown', thDown);
+  cv.addEventListener('pointermove', thMove);
+  cv.addEventListener('pointerup', thUp);
+  cv.addEventListener('pointercancel', thUp);
+  cv.addEventListener('wheel', thRoda, { passive:false });
+  TH.ro = new ResizeObserver(()=>thRedimensionar());
+  TH.ro.observe(document.getElementById('th-stage'));
+  if(t.lat!=null) thModoDesenho(false); else thModoMapa();
+}
+window.thFechar = (forcar)=>{
+  if(!TH) return;
+  if(forcar!==true && TH.mudou && !confirm('Fechar sem salvar o layout do telhado?')) return;
+  document.removeEventListener('keydown', thTecla);
+  if(TH.ro) TH.ro.disconnect();
+  const el = document.getElementById('th-modal'); if(el) el.remove();
+  document.body.style.overflow = '';
+  TH = null;
+};
+window.thSalvar = async ()=>{
+  if(!TH) return;
+  const t = TH.t;
+  if(t.lat==null){ toast('Escolha primeiro o local do telhado (botão "Usar esta vista").'); return; }
+  t.blocos = t.blocos.filter(b=>b.lin*b.col > (b.off||[]).length);
+  t.blocos.forEach(b=>{ b.x = +b.x.toFixed(3); b.y = +b.y.toFixed(3); b.rot = +(+b.rot||0).toFixed(1); });
+  if((+t.modC !== +(STATE.proposalSettings||{}).telhadoModC) || (+t.modL !== +(STATE.proposalSettings||{}).telhadoModL)){
+    STATE.proposalSettings = { ...(STATE.proposalSettings||{}), telhadoModC:+t.modC, telhadoModL:+t.modL };
+    saveKey('proposalSettings', STATE.proposalSettings).catch(e=>console.error(e));
+  }
+  const cb = TH.opts.onSave;
+  thFechar(true);
+  if(cb) await cb(t);
+};
+function thMsg(txt){
+  const m = document.getElementById('th-msg'); if(!m) return;
+  m.textContent = txt || ''; m.hidden = !txt;
+}
+function thSel(){ return TH && TH.sel>=0 ? TH.t.blocos[TH.sel] : null; }
+function thMudou(){ if(TH){ TH.mudou = true; thContagem(); thRender(); } }
+function thContagem(){
+  if(!TH) return;
+  const n = telhadoContagem(TH.t), alvo = TH.opts.alvo||0;
+  const txt = alvo ? `${n} de ${alvo} placas posicionadas` : `${n} placa${n===1?'':'s'} posicionada${n===1?'':'s'}`;
+  const f = document.getElementById('th-cont'); if(f) f.textContent = TH.modo==='desenho' ? txt + ` · área ocupada ≈ ${fmtMoney(n*TH.t.modC*TH.t.modL)} m²` : '';
+  const c = document.getElementById('th-count');
+  if(c){ c.textContent = txt; c.className = 'th-count' + (alvo && n===alvo ? ' ok' : (alvo && n>alvo ? ' over' : '')); }
+}
+
+/* --- modo 1: achar o imóvel no mapa --- */
+async function thModoMapa(){
+  TH.modo = 'mapa';
+  document.getElementById('th-map').hidden = false;
+  document.getElementById('th-cross').hidden = false;
+  document.getElementById('th-canvas').hidden = true;
+  document.getElementById('th-zoom').hidden = true;
+  document.getElementById('th-side').innerHTML = `
+    <div class="th-sec"><h4>1. Encontre o imóvel</h4>
+      <div class="field"><label for="th-busca">Endereço, coordenadas ou link do Google Maps</label>
+        <input id="th-busca" value="${esc(TH.opts.endereco||'')}" onkeydown="if(event.key==='Enter'){event.preventDefault();thBuscar();}"></div>
+      <button type="button" class="btn btn-outline btn-sm" onclick="thBuscar()">Buscar</button>
+      <div class="help" style="margin-top:10px">Arraste o mapa até o telhado ficar dentro da mira laranja e aproxime o máximo que der.<br>Dica: no Google Maps, clique com o botão direito no telhado e clique nas coordenadas para copiar.</div>
+    </div>
+    <div class="th-sec"><h4>2. Trave a imagem</h4>
+      <button type="button" class="btn btn-primary" onclick="thUsarVista()">Usar esta vista</button>
+      ${TH.t.lat!=null?`<button type="button" class="btn btn-outline btn-sm" style="margin-left:6px" onclick="thModoDesenho(false)">Voltar ao desenho</button>`:''}
+    </div>`;
+  thContagem();
+  if(!gmapsKey()){ thMsg('Para usar o projeto no telhado, cadastre a chave do Google Maps em Configurações → Google Maps.'); return; }
+  try{
+    await carregarGoogleMaps();
+    const { Map } = await google.maps.importLibrary('maps');
+    if(!TH) return;
+    const tem = TH.t.lat!=null;
+    const centro = tem ? { lat:TH.t.lat, lng:TH.t.lng } : { lat:-18.9186, lng:-48.2772 };
+    if(!TH.map){
+      TH.map = new Map(document.getElementById('th-map'), {
+        center: centro, zoom: tem ? TH.t.zoom : 13, mapTypeId:'satellite', tilt:0, heading:0,
+        rotateControl:false, streetViewControl:false, fullscreenControl:false, mapTypeControl:false,
+        clickableIcons:false, gestureHandling:'greedy', keyboardShortcuts:false
+      });
+    }
+    thMsg('');
+    if(!tem && TH.opts.endereco) thBuscar();
+  }catch(e){ thMsg(e.message); }
+}
+function thParseCoord(s){
+  const m = s.match(/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/) || s.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/)
+    || s.match(/[?&](?:q|query|ll|center)=(-?\d+\.\d+)(?:,|%2C)\s*(-?\d+\.\d+)/i) || s.match(/^\s*(-?\d{1,2}\.\d+)\s*,\s*(-?\d{1,3}\.\d+)\s*$/);
+  if(!m) return null;
+  const lat = +m[1], lng = +m[2];
+  return (Math.abs(lat)<=90 && Math.abs(lng)<=180) ? { lat, lng } : null;
+}
+window.thBuscar = async ()=>{
+  if(!TH || !TH.map) return;
+  const q = ((document.getElementById('th-busca')||{}).value||'').trim();
+  if(!q) return;
+  if(/maps\.app\.goo\.gl|goo\.gl\/maps/.test(q)){ toast('Links curtos do Google Maps não trazem as coordenadas. Abra o link, clique com o botão direito no telhado e copie as coordenadas.'); return; }
+  const c = thParseCoord(q);
+  if(c){ TH.map.setCenter(c); TH.map.setZoom(20); return; }
+  try{
+    const { Geocoder } = await google.maps.importLibrary('geocoding');
+    const r = await new Geocoder().geocode({ address:q, region:'br' });
+    if(!TH) return;
+    TH.map.setCenter(r.results[0].geometry.location);
+    TH.map.setZoom(19);
+  }catch(e){
+    const cod = (e && e.code) || '';
+    toast(cod==='REQUEST_DENIED' ? 'A busca por endereço precisa da "Geocoding API" ativada na chave. Cole as coordenadas ou arraste o mapa.'
+      : 'Endereço não encontrado. Arraste o mapa até o imóvel ou cole as coordenadas.');
+  }
+};
+window.thUsarVista = async ()=>{
+  if(!TH || !TH.map) return;
+  const c = TH.map.getCenter(), z = Math.round(TH.map.getZoom());
+  if(z < 18){ toast('Aproxime mais o mapa, até ver bem o telhado.'); return; }
+  TH.t.lat = +c.lat().toFixed(7); TH.t.lng = +c.lng().toFixed(7);
+  TH.t.zoom = Math.min(21, Math.max(19, z));
+  TH.mudou = true;
+  await thModoDesenho(true);
+};
+
+/* --- modo 2: desenhar as placas --- */
+window.thModoDesenho = async (novo)=>{
+  if(!TH) return;
+  TH.modo = 'desenho';
+  document.getElementById('th-map').hidden = true;
+  document.getElementById('th-cross').hidden = true;
+  document.getElementById('th-canvas').hidden = false;
+  document.getElementById('th-zoom').hidden = false;
+  thLado();
+  thRedimensionar(true);
+  thMsg('Carregando imagem de satélite...');
+  try{ TH.img = await thCarregarImagem(TH.t); if(!TH) return; thMsg(''); }
+  catch(e){ if(!TH) return; TH.img = null; thMsg(e.message); }
+  if(novo && !TH.t.blocos.length) thNovoBloco(); else thEnquadrar();
+};
+function thLado(){
+  const t = TH.t, b = thSel();
+  document.getElementById('th-side').innerHTML = `
+    <div class="th-sec"><h4>Placas</h4>
+      <div class="th-count" id="th-count"></div>
+      <button type="button" class="btn btn-accent btn-sm" onclick="thNovoBloco()">+ Adicionar bloco de placas</button>
+    </div>
+    <div class="th-sec">${b ? `<h4>Bloco selecionado</h4>
+      <div class="row">
+        <div class="field"><label for="th-lin">Fileiras</label><input id="th-lin" type="number" min="1" max="60" value="${b.lin}" onchange="thBloco('lin',this.value)"></div>
+        <div class="field"><label for="th-col">Placas por fileira</label><input id="th-col" type="number" min="1" max="60" value="${b.col}" onchange="thBloco('col',this.value)"></div>
+      </div>
+      <div class="field"><label for="th-ori">Posição das placas</label>
+        <select id="th-ori" onchange="thBloco('ori',this.value)">
+          <option value="retrato" ${b.ori!=='paisagem'?'selected':''}>Em pé (retrato)</option>
+          <option value="paisagem" ${b.ori==='paisagem'?'selected':''}>Deitada (paisagem)</option>
+        </select></div>
+      <div class="field"><label for="th-rot">Giro: <b id="th-rotv">${(+b.rot||0).toFixed(1).replace('.',',')}°</b></label>
+        <input id="th-rot" type="range" min="-180" max="180" step="0.5" value="${+b.rot||0}" oninput="thBloco('rot',this.value)"></div>
+      <div class="row" style="gap:6px">
+        <button type="button" class="btn btn-outline btn-sm" onclick="thDuplicar()">Duplicar</button>
+        <button type="button" class="btn btn-danger btn-sm" onclick="thExcluir()">Excluir bloco</button>
+      </div>` : `<h4>Bloco selecionado</h4><div class="help">Clique em um bloco de placas para editar.</div>`}
+    </div>
+    <div class="th-sec"><h4>Medidas do módulo</h4>
+      <div class="row">
+        <div class="field"><label for="th-modc">Comprimento (m)</label><input id="th-modc" type="number" step="0.001" min="0.5" value="${t.modC}" onchange="thModulo()"></div>
+        <div class="field"><label for="th-modl">Largura (m)</label><input id="th-modl" type="number" step="0.001" min="0.5" value="${t.modL}" onchange="thModulo()"></div>
+      </div>
+      <div class="field"><label for="th-esp">Espaço entre placas (cm)</label><input id="th-esp" type="number" step="0.5" min="0" value="${(+t.esp*100).toFixed(1).replace(/\.0$/,'')}" onchange="thModulo()"></div>
+    </div>
+    <div class="th-sec"><h4>Imagem</h4>
+      <div class="field"><label for="th-zoomimg">Aproximação da imagem de satélite</label>
+        <select id="th-zoomimg" onchange="thZoomImagem(this.value)">
+          ${[19,20,21].map(z=>`<option value="${z}" ${+t.zoom===z?'selected':''}>${z===19?'Normal':z===20?'Perto':'Bem perto (se houver imagem)'}</option>`).join('')}
+        </select></div>
+      <button type="button" class="btn btn-outline btn-sm" onclick="thModoMapa()">Trocar o local</button>
+    </div>
+    <div class="help th-dicas"><b>Como usar:</b> arraste o bloco para mover; arraste a bolinha laranja para girar e alinhar com o telhado; <b>Shift + clique</b> em uma placa tira ou recoloca só ela; a roda do mouse aproxima. No teclado: setas movem (Shift = 50 cm), Q / E giram, Delete apaga o bloco.</div>`;
+  thContagem();
+}
+window.thBloco = (campo, val)=>{
+  const b = thSel(); if(!b) return;
+  if(campo==='lin' || campo==='col'){
+    const n = Math.max(1, Math.min(60, parseInt(val)||1));
+    if(campo==='col' && n!==b.col) b.off = [];
+    b[campo] = n;
+    b.off = (b.off||[]).filter(i=>i < b.lin*b.col);
+  }else if(campo==='ori'){ b.ori = val; }
+  else if(campo==='rot'){ b.rot = +val; const l = document.getElementById('th-rotv'); if(l) l.textContent = (+val).toFixed(1).replace('.',',')+'°'; }
+  thMudou();
+};
+window.thModulo = ()=>{
+  const t = TH.t;
+  t.modC = Math.max(0.5, +document.getElementById('th-modc').value || TH_PAD.modC);
+  t.modL = Math.max(0.5, +document.getElementById('th-modl').value || TH_PAD.modL);
+  t.esp = Math.max(0, (+document.getElementById('th-esp').value || 0)/100);
+  thMudou();
+};
+window.thZoomImagem = async (z)=>{
+  const t = TH.t, k0 = 1/thMpp(t.lat, t.zoom);
+  t.zoom = +z; TH.mudou = true;
+  const k1 = 1/thMpp(t.lat, t.zoom);
+  if(TH.v){ // mantém o mesmo enquadramento em metros
+    const W = TH.cw, H = TH.ch, mx = ((W/2 - TH.v.ox)/TH.v.s - TH_IMG/2)/k0, my = ((H/2 - TH.v.oy)/TH.v.s - TH_IMG/2)/k0;
+    TH.v.s = TH.v.s*k0/k1; TH.v.ox = W/2 - (TH_IMG/2 + mx*k1)*TH.v.s; TH.v.oy = H/2 - (TH_IMG/2 + my*k1)*TH.v.s;
+  }
+  thMsg('Carregando imagem de satélite...');
+  try{ TH.img = await thCarregarImagem(t); if(!TH) return; thMsg(''); }catch(e){ if(!TH) return; TH.img = null; thMsg(e.message); }
+  thRender();
+};
+window.thNovoBloco = ()=>{
+  const t = TH.t, alvo = TH.opts.alvo||0, n = telhadoContagem(t);
+  let falta = alvo ? Math.max(alvo - n, 0) : 0; if(!falta) falta = 6;
+  let lin, col;
+  if(falta <= 6){ lin = 1; col = falta; } else { col = Math.min(12, Math.ceil(falta/2)); lin = Math.ceil(falta/col); }
+  const off = []; for(let i = falta; i < lin*col; i++) off.push(i);
+  const c = thCentroVista(), ult = t.blocos[t.blocos.length-1];
+  t.blocos.push({ x:c.x, y:c.y, rot: ult ? ult.rot||0 : 0, lin, col, ori: ult ? ult.ori : 'retrato', off });
+  TH.sel = t.blocos.length-1;
+  thLado(); thMudou();
+  if(t.blocos.length===1) thEnquadrar();
+};
+window.thDuplicar = ()=>{
+  const b = thSel(); if(!b) return;
+  const d = thDim(TH.t, b), q = thRot(0, d.H + 0.5, (b.rot||0)*Math.PI/180);
+  TH.t.blocos.push({ ...JSON.parse(JSON.stringify(b)), x: b.x+q.x, y: b.y+q.y });
+  TH.sel = TH.t.blocos.length-1; thLado(); thMudou();
+};
+window.thExcluir = ()=>{
+  if(TH.sel<0) return;
+  TH.t.blocos.splice(TH.sel, 1); TH.sel = -1; thLado(); thMudou();
+};
+
+/* --- vista (zoom/arrastar) --- */
+function thRedimensionar(inicial){
+  if(!TH || TH.modo!=='desenho') return;
+  const st = document.getElementById('th-stage'), cv = document.getElementById('th-canvas');
+  if(!st || !cv) return;
+  const dpr = window.devicePixelRatio || 1, W = Math.max(50, Math.round(st.clientWidth*dpr)), H = Math.max(50, Math.round(st.clientHeight*dpr));
+  if(TH.v && TH.cw){ TH.v.ox += (W - TH.cw)/2; TH.v.oy += (H - TH.ch)/2; }
+  cv.width = W; cv.height = H; TH.cw = W; TH.ch = H; TH.dpr = dpr;
+  if(!TH.v || inicial===true) thEnquadrar(); else thRender();
+}
+function thCentroVista(){
+  const t = TH.t, k = 1/thMpp(t.lat, t.zoom);
+  if(!TH.v) return { x:0, y:0 };
+  return { x: ((TH.cw/2 - TH.v.ox)/TH.v.s - TH_IMG/2)/k, y: ((TH.ch/2 - TH.v.oy)/TH.v.s - TH_IMG/2)/k };
+}
+window.thEnquadrar = ()=>{
+  if(!TH || !TH.cw) return;
+  const t = TH.t, k = 1/thMpp(t.lat, t.zoom);
+  let cx = 0, cy = 0, span = 32;
+  const pts = [];
+  t.blocos.forEach(b=>{ const d = thDim(t,b), a = (b.rot||0)*Math.PI/180;
+    [[-1,-1],[1,-1],[1,1],[-1,1]].forEach(([sx,sy])=>{ const q = thRot(sx*d.W/2, sy*d.H/2, a); pts.push([b.x+q.x, b.y+q.y]); }); });
+  if(pts.length){
+    const xs = pts.map(p=>p[0]), ys = pts.map(p=>p[1]);
+    cx = (Math.min(...xs)+Math.max(...xs))/2; cy = (Math.min(...ys)+Math.max(...ys))/2;
+    span = Math.max(Math.max(...xs)-Math.min(...xs), Math.max(...ys)-Math.min(...ys))*1.8 + 8;
+  }
+  const s = Math.min(TH.cw, TH.ch)/(span*k);
+  TH.v = { s, ox: TH.cw/2 - (TH_IMG/2 + cx*k)*s, oy: TH.ch/2 - (TH_IMG/2 + cy*k)*s };
+  thRender();
+};
+window.thZoomVista = (f, px, py)=>{
+  if(!TH || !TH.v) return;
+  const t = TH.t, k = 1/thMpp(t.lat, t.zoom);
+  const smin = Math.min(TH.cw, TH.ch)/TH_IMG*0.9, smax = Math.min(TH.cw, TH.ch)/(5*k);
+  const s1 = Math.max(smin, Math.min(smax, TH.v.s*f));
+  px = px===undefined ? TH.cw/2 : px; py = py===undefined ? TH.ch/2 : py;
+  TH.v.ox = px - (px - TH.v.ox)*s1/TH.v.s; TH.v.oy = py - (py - TH.v.oy)*s1/TH.v.s; TH.v.s = s1;
+  thRender();
+};
+function thRender(){
+  if(!TH || TH.modo!=='desenho' || !TH.v) return;
+  const cv = document.getElementById('th-canvas'); if(!cv) return;
+  const ctx = cv.getContext('2d'), t = TH.t, k = 1/thMpp(t.lat, t.zoom);
+  thDesenhar(ctx, t, TH.img, TH.v, { editar:true, sel:TH.sel });
+  thMarcas(ctx, cv.width, cv.height, k*TH.v.s, TH.dpr||1);
+}
+
+/* --- mouse / toque --- */
+function thPonto(e){
+  const r = e.target.getBoundingClientRect(), dpr = TH.dpr||1;
+  return { x:(e.clientX - r.left)*dpr, y:(e.clientY - r.top)*dpr };
+}
+function thParaMetros(p){
+  const t = TH.t, k = 1/thMpp(t.lat, t.zoom);
+  return { x: ((p.x - TH.v.ox)/TH.v.s - TH_IMG/2)/k, y: ((p.y - TH.v.oy)/TH.v.s - TH_IMG/2)/k };
+}
+/* qual bloco/placa está sob o ponto (ou a alça de giro do bloco selecionado) */
+function thAcertar(p){
+  const t = TH.t, k = 1/thMpp(t.lat, t.zoom), pxm = k*TH.v.s, dpr = TH.dpr||1;
+  const loc = (b)=>{
+    const bx = TH.v.ox + (TH_IMG/2 + b.x*k)*TH.v.s, by = TH.v.oy + (TH_IMG/2 + b.y*k)*TH.v.s;
+    const q = thRot(p.x - bx, p.y - by, -(b.rot||0)*Math.PI/180);
+    return { q, bx, by };
+  };
+  const sb = thSel();
+  if(sb){ const d = thDim(t, sb), { q } = loc(sb);
+    if(Math.hypot(q.x, q.y - (-d.H*pxm/2 - 30)) < 14*Math.max(1,dpr)) return { bi:TH.sel, alca:true }; }
+  for(let bi = t.blocos.length-1; bi>=0; bi--){
+    const b = t.blocos[bi], d = thDim(t, b), { q } = loc(b);
+    const lx = q.x/pxm, ly = q.y/pxm;
+    if(Math.abs(lx) <= d.W/2 && Math.abs(ly) <= d.H/2){
+      const c = Math.min(b.col-1, Math.max(0, Math.floor((lx + d.W/2)/(d.w + d.e))));
+      const r = Math.min(b.lin-1, Math.max(0, Math.floor((ly + d.H/2)/(d.h + d.e))));
+      return { bi, i: r*b.col + c };
+    }
+  }
+  return null;
+}
+function thDown(e){
+  if(!TH || !TH.v) return;
+  const p = thPonto(e), h = thAcertar(p), cv = e.target;
+  cv.setPointerCapture(e.pointerId);
+  if(h && h.alca){ TH.drag = { tipo:'giro' }; return; }
+  if(h){
+    const b = TH.t.blocos[h.bi];
+    if(e.shiftKey){
+      const off = new Set(b.off||[]); off.has(h.i) ? off.delete(h.i) : off.add(h.i); b.off = [...off];
+      if(TH.sel!==h.bi){ TH.sel = h.bi; thLado(); }
+      thMudou(); return;
+    }
+    if(TH.sel!==h.bi){ TH.sel = h.bi; thLado(); }
+    const m = thParaMetros(p);
+    TH.drag = { tipo:'mover', m0:m, x0:b.x, y0:b.y };
+    cv.classList.add('mov'); thRender(); return;
+  }
+  if(TH.sel!==-1){ TH.sel = -1; thLado(); }
+  TH.drag = { tipo:'vista', p0:p, ox:TH.v.ox, oy:TH.v.oy };
+  cv.classList.add('mov'); thRender();
+}
+function thMove(e){
+  if(!TH || !TH.drag) return;
+  const p = thPonto(e), d = TH.drag;
+  if(d.tipo==='vista'){ TH.v.ox = d.ox + (p.x - d.p0.x); TH.v.oy = d.oy + (p.y - d.p0.y); thRender(); return; }
+  const b = thSel(); if(!b) return;
+  if(d.tipo==='mover'){ const m = thParaMetros(p); b.x = d.x0 + (m.x - d.m0.x); b.y = d.y0 + (m.y - d.m0.y); thMudou(); return; }
+  if(d.tipo==='giro'){
+    const t = TH.t, k = 1/thMpp(t.lat, t.zoom);
+    const bx = TH.v.ox + (TH_IMG/2 + b.x*k)*TH.v.s, by = TH.v.oy + (TH_IMG/2 + b.y*k)*TH.v.s;
+    let a = Math.atan2(p.x - bx, -(p.y - by))*180/Math.PI;
+    a = e.shiftKey ? Math.round(a/15)*15 : Math.round(a*2)/2;
+    b.rot = a;
+    const r = document.getElementById('th-rot'); if(r) r.value = a;
+    const l = document.getElementById('th-rotv'); if(l) l.textContent = a.toFixed(1).replace('.',',')+'°';
+    thMudou();
+  }
+}
+function thUp(e){
+  if(!TH) return;
+  TH.drag = null;
+  e.target.classList.remove('mov');
+}
+function thRoda(e){
+  if(!TH || !TH.v) return;
+  e.preventDefault();
+  const p = thPonto(e);
+  thZoomVista(e.deltaY < 0 ? 1.15 : 1/1.15, p.x, p.y);
+}
+function thTecla(e){
+  if(!TH) return;
+  if(e.key==='Escape'){ thFechar(); return; }
+  if(TH.modo!=='desenho') return;
+  const tag = (document.activeElement && document.activeElement.tagName) || '';
+  if(/INPUT|SELECT|TEXTAREA/.test(tag)) return;
+  const b = thSel(); if(!b) return;
+  const passo = e.shiftKey ? 0.5 : 0.05;
+  const mov = { ArrowLeft:[-passo,0], ArrowRight:[passo,0], ArrowUp:[0,-passo], ArrowDown:[0,passo] }[e.key];
+  if(mov){ b.x += mov[0]; b.y += mov[1]; e.preventDefault(); thMudou(); return; }
+  if(e.key==='q' || e.key==='Q' || e.key==='e' || e.key==='E'){
+    b.rot = (+b.rot||0) + ((e.key.toLowerCase()==='q') ? -1 : 1)*(e.shiftKey ? 5 : 1);
+    if(b.rot > 180) b.rot -= 360; if(b.rot < -180) b.rot += 360;
+    const r = document.getElementById('th-rot'); if(r) r.value = b.rot;
+    const l = document.getElementById('th-rotv'); if(l) l.textContent = b.rot.toFixed(1).replace('.',',')+'°';
+    e.preventDefault(); thMudou(); return;
+  }
+  if(e.key==='Delete' || e.key==='Backspace'){ e.preventDefault(); thExcluir(); }
+}
+
+/* ---------- ligação com a proposta ---------- */
+function telhadoCardHtml(){
+  const t = WIZ.telhado, n = telhadoContagem(t), ok = !!gmapsKey();
+  return `<div class="card" id="wiz-telhado-card">
+    <h2>Projeto no telhado <span class="pill">opcional</span></h2>
+    <div class="sub">Posicione as placas, em escala, sobre a imagem de satélite do imóvel. O desenho vira uma página da proposta.</div>
+    ${!ok?`<div class="help">Para usar, cadastre a chave do Google Maps em <b>Configurações → Google Maps</b>.</div>`:''}
+    ${n?`<div class="th-resumo"><b>${n} placa${n>1?'s':''}</b> posicionada${n>1?'s':''} no telhado · área ocupada ≈ ${fmtMoney(n*t.modC*t.modL)} m²</div>`:''}
+    <div class="row" style="gap:8px;align-items:center">
+      <button type="button" class="btn btn-outline" onclick="abrirTelhadoWizard()" ${ok?'':'disabled'}>${n?'Editar layout no telhado':'Desenhar no telhado'}</button>
+      ${n?`<button type="button" class="btn btn-outline" onclick="usarQtdTelhado()">Usar ${n} como quantidade de módulos</button>
+      <button type="button" class="btn btn-danger btn-sm" onclick="removerTelhadoWizard()">Remover</button>`:''}
+    </div>
+  </div>`;
+}
+function atualizarCardTelhado(){ const el = document.getElementById('wiz-telhado-card'); if(el) el.outerHTML = telhadoCardHtml(); }
+window.abrirTelhadoWizard = ()=>{
+  const cli = STATE.clients.find(c=>c.id===WIZ.clientId) || {};
+  const inp = document.getElementById('wiz-ce-modqtd');
+  const alvo = parseInt(inp ? inp.value : WIZ.contratoEquip.modulosQtd) || 0;
+  thAbrir(WIZ.telhado, { titulo: cli.nome||'', alvo, endereco: thEnderecoCliente(cli),
+    onSave: (t)=>{ WIZ.telhado = telhadoContagem(t) ? t : null; atualizarCardTelhado(); toast(WIZ.telhado ? 'Layout salvo. Ele entra como uma página da proposta.' : 'Layout sem placas: nada foi incluído na proposta.'); } });
+};
+window.usarQtdTelhado = ()=>{
+  const n = telhadoContagem(WIZ.telhado);
+  const inp = document.getElementById('wiz-ce-modqtd'); if(inp) inp.value = n;
+  WIZ.contratoEquip.modulosQtd = n;
+  toast(`Quantidade de módulos atualizada para ${n}.`);
+};
+window.removerTelhadoWizard = ()=>{
+  if(!confirm('Remover o layout do telhado desta proposta?')) return;
+  WIZ.telhado = null; atualizarCardTelhado();
+};
+window.editarTelhadoProposta = (id)=>{
+  const p = STATE.proposals.find(x=>x.id===id); if(!p) return;
+  if(!gmapsKey()){ toast('Cadastre a chave do Google Maps em Configurações → Google Maps.'); return; }
+  const cli = STATE.clients.find(c=>c.id===p.clientId) || {};
+  thAbrir(p.telhado, { titulo: p.clientNome||'', alvo: parseInt((p.contratoEquip||{}).modulosQtd)||0, endereco: thEnderecoCliente(cli),
+    onSave: async (t)=>{
+      p.telhado = telhadoContagem(t) ? t : null;
+      stampUpdated(p);
+      await saveKey('proposals', STATE.proposals);
+      renderMain();
+      toast(p.telhado ? 'Layout do telhado salvo. Ele aparece no PDF desta proposta.' : 'Layout removido da proposta.');
+    } });
+};
+
+/* ---------- Configurações → Google Maps ---------- */
+function viewGmapsConfig(){
+  const site = (location.protocol.startsWith('http') ? location.origin : 'https://supersunn.com.br') + '/*';
+  return `
+    <div class="sub">Usado no <b>Projeto no telhado</b>: o mapa para achar o imóvel e a imagem de satélite onde as placas são desenhadas, em escala.</div>
+    <div class="help"><b>Como ligar (uma vez só):</b><br>
+      1. Abra o <a href="https://console.cloud.google.com/google/maps-apis/overview" target="_blank" rel="noopener">Google Cloud Console</a> e escolha (ou crie) um projeto com faturamento ativo.<br>
+      2. Em <b>APIs e serviços → Biblioteca</b>, ative: <b>Maps JavaScript API</b>, <b>Maps Static API</b> e <b>Geocoding API</b>.<br>
+      3. Em <b>Credenciais → Criar credenciais → Chave de API</b>. Na chave, em <b>Restrições de aplicativos</b>, escolha <b>Sites</b> e adicione <code>${esc(site)}</code>. Em <b>Restrições de API</b>, marque só as três APIs acima.<br>
+      4. Cole a chave aqui e clique em <b>Salvar e testar</b>.</div>
+    <form id="gmaps-form">
+      <div class="row"><div class="field" style="flex:3"><label>Chave de API do Google Maps</label>
+        <input name="gmapsKey" value="${esc(gmapsKey())}" placeholder="AIza..." autocomplete="off" spellcheck="false" style="font-family:monospace;font-size:12px"></div></div>
+      <button type="submit" class="btn btn-primary">Salvar e testar</button>
+    </form>
+    <div id="gmaps-result" style="margin-top:8px;font-size:13px"></div>`;
+}
+document.addEventListener('submit', async (e)=>{
+  if(e.target.id !== 'gmaps-form') return;
+  e.preventDefault();
+  const out = document.getElementById('gmaps-result');
+  const key = (new FormData(e.target).get('gmapsKey')||'').trim();
+  STATE.proposalSettings = { ...(STATE.proposalSettings||{}), gmapsKey: key };
+  await saveKey('proposalSettings', STATE.proposalSettings);
+  if(!key){ out.textContent = 'Chave removida.'; return; }
+  out.textContent = 'Testando...';
+  try{
+    const r = await fetch(thUrlImagem({ lat:-18.9186, lng:-48.2772, zoom:18 }, '64x64'));
+    if(r.ok) out.innerHTML = '✅ Imagem de satélite funcionando. Se o mapa do editor não abrir, confira se a <b>Maps JavaScript API</b> também está ativada.';
+    else out.textContent = '❌ O Google recusou a chave (' + r.status + '): ' + (await r.text()).slice(0,200);
+  }catch(err){ out.textContent = '❌ ' + err.message; }
+});
+
 function pdfFrame(numero, page, kicker, title, sub, body){
   const S = propSettings();
   const rod = ['SUPERSUNN Energia Solar', S.cnpj?('CNPJ '+S.cnpj):'', S.site].filter(Boolean).map(esc).join('  •  ');
@@ -5420,6 +6139,17 @@ function pdfPagesHtml(calc, pagamento){
     ${servicos.length?`<div class="ss-label">SERVIÇOS INCLUSOS NO VALOR</div>
     <div class="ss-checks">${servicos.map(s=>`<div>${pdfCircle('check','#22C55E',22)}<span>${esc(s)}</span></div>`).join('')}</div>`:''}`);
 
+  /* 5b. PROJETO NO TELHADO */
+  const tl = calc.telhado, nTl = telhadoContagem(tl);
+  const telhadoPg = (calc.telhadoImg && nTl) ? pdfFrame(numero, 0, '04 &nbsp;•&nbsp; SISTEMA PROPOSTO', 'Seu sistema no telhado',
+    `Simulação em escala de ${nTl} módulos sobre a imagem de satélite do imóvel`, `
+    <div class="ss-roof"><img src="${calc.telhadoImg}" alt=""></div>
+    <div class="ss-stats4">
+      ${[[nTl,'módulos no layout'],[fmtMoney(nTl*tl.modC*tl.modL)+' m²','área ocupada'],[`${String(+tl.modC).replace('.',',')} × ${String(+tl.modL).replace('.',',')} m`,'medida do módulo'],[calc.kwp.toFixed(2).replace('.',',')+' kWp','potência do sistema']]
+        .map(([v,l])=>`<div><div class="sv">${v}</div><div class="sl">${l}</div></div>`).join('')}
+    </div>
+    <div class="ss-note">Imagem ilustrativa, em escala, feita sobre imagem de satélite (© Google). A posição final dos módulos é definida no projeto executivo, após a visita técnica.</div>`) : '';
+
   /* 6. RETORNO */
   const retorno = fin ? pdfFrame(numero, 6, '05 &nbsp;•&nbsp; RETORNO DO INVESTIMENTO', 'Um investimento que se paga', null, `
     <div class="ss-stats3">
@@ -5509,7 +6239,8 @@ function pdfPagesHtml(calc, pagamento){
     <img class="ss-cover-swoosh" src="${swooshCoverImg()}">
   </div>`;
 
-  return capa + resumo + quem + consumo + sistema + retorno + invest + etapasPg + garantias + fechamento;
+  const paginas = [capa, resumo, quem, consumo, sistema, telhadoPg, retorno, invest, etapasPg, garantias, fechamento].filter(Boolean);
+  return paginas.map((h,i)=>h.replace(/<div class="ss-pg">\d+<\/div>/, `<div class="ss-pg">${i+1}</div>`)).join('');
 }
 
 
