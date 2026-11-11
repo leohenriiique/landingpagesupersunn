@@ -5487,7 +5487,7 @@ function thMarcas(ctx, W, H, pxm, u){
   u = u || 1;
   ctx.save();
   const opc = [1,2,5,10,20,50];
-  let L = opc[0]; for(const o of opc){ if(o*pxm <= W*0.22) L = o; }
+  let L = opc[0]; for(const o of opc){ if(o*pxm <= W*0.25) L = o; }
   const bw = L*pxm, x0 = 18*u, y0 = H - 22*u;
   ctx.fillStyle = 'rgba(0,0,0,.45)'; ctx.fillRect(x0-8*u, y0-30*u, bw+16*u+60*u, 40*u);
   ctx.fillStyle = '#fff'; ctx.fillRect(x0, y0-6*u, bw, 6*u);
@@ -5519,7 +5519,7 @@ async function telhadoExportar(t){
   });
   if(!isFinite(x0)) throw new Error('Nenhuma placa no layout.');
   const W = 1600, H = 1380, ext = TH_IMG/k;
-  let wm = Math.max((x1-x0)*1.9+8, ((y1-y0)*1.9+6)*W/H, 26);
+  let wm = Math.max((x1-x0)*1.9+8, ((y1-y0)*1.9+6)*W/H, 50);   // ≥ 50 m de largura: mostra a casa e a vizinhança (escala de 10 m)
   wm = Math.min(wm, ext);
   const hm = wm*H/W, lim = ext/2;
   const cx = Math.max(-lim+wm/2, Math.min(lim-wm/2, (x0+x1)/2));
