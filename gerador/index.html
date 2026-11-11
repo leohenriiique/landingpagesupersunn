@@ -1620,6 +1620,7 @@ let STATE = {
 async function loadAll(){
   STATE.clients = await loadKey('clients', []);
   STATE.kits = await loadKey('kits', []);
+  STATE.hibCatalogo = await loadKey('hibCatalogo', null);
   STATE.irradiation = await loadKey('irradiation', DEFAULT_IRRADIATION);
   STATE.cardRates = await loadKey('cardRates', DEFAULT_CARD_RATES);
   STATE.bank = await loadKey('bank', DEFAULT_BANK);
@@ -3924,6 +3925,7 @@ function viewConfiguracoes(){
       ${accordionItem('contratada', 'Dados da Contratada', viewContratada())}
       ${accordionItem('drive', 'Google Drive (documentos dos clientes)', viewDriveConfig())}
       ${accordionItem('gmaps', 'Google Maps (projeto no telhado)', viewGmapsConfig())}
+      ${accordionItem('hibcat', 'Inversores e baterias (sistema híbrido)', viewHibCatalogoConfig())}
     </div>
   </div>`;
 }
@@ -6065,22 +6067,55 @@ document.addEventListener('submit', async (e)=>{
    • pico = todas as cargas ligadas juntas (tem de caber no inversor);
      partida = pico + 2 × maior motor (motores puxam ~3× na partida)
    ========================================================================= */
-const BAT = { modelo:'Growatt HOPE 16.0LM-A1', quimica:'LiFePO4', tensao:51.2, nominal:16, util:15.3, dod:95,
-  iCarga:150, iDescarga:200, ciclos:6000, garantia:'5 anos (10 anos opcional)', maxParalelo:48, peso:120 };
-const HIB_EFIC = 0.92;
-const HIB_INVERSORES = [
-  { id:'spe6000',  modelo:'Growatt SPE 6000US',     kw:6,   fase:'bifásico 127/220 V' },
-  { id:'spe7500',  modelo:'Growatt SPE 7500US',     kw:7.5, fase:'bifásico 127/220 V' },
-  { id:'spe8000',  modelo:'Growatt SPE 8000US',     kw:8,   fase:'bifásico 127/220 V' },
-  { id:'spe10000', modelo:'Growatt SPE 10000US',    kw:10,  fase:'bifásico 127/220 V' },
-  { id:'spe12000', modelo:'Growatt SPE 12000US',    kw:12,  fase:'bifásico 127/220 V' },
-  { id:'sph10000', modelo:'Growatt SPH 10000TL-HU', kw:10,  fase:'monofásico 220 V ou bifásico 127/220 V' },
-  { id:'wit15',    modelo:'Growatt WIT 15K-HU',     kw:15,  fase:'trifásico 220/380 V' },
-  { id:'wit20',    modelo:'Growatt WIT 20K-HU',     kw:20,  fase:'trifásico 220/380 V' },
-  { id:'wit30',    modelo:'Growatt WIT 30K-HU',     kw:30,  fase:'trifásico 220/380 V' },
-  { id:'wit50',    modelo:'Growatt WIT 50K-HU',     kw:50,  fase:'trifásico 220/380 V' },
-];
-/* w = potência (W); uso = % do tempo ligado durante a falta; motor = partida forte */
+/* catálogo padrão (lista do distribuidor, preços de nov/2026; editável em Configurações)
+   bat: tensão de bateria que o inversor aceita — 'BT' (48 V), 'AT' (alta tensão) ou '?' (confirmar) */
+const HIB_CAT_PADRAO = {
+  inversores: [
+    { id:'INVDE-H-MO-220V-5KW',  marca:'Deye',      kw:5,    fase:'Monofásico 220 V', mppt:2, bat:'BT', preco:4499.08 },
+    { id:'INVSG-H-MO-220-5KW',   marca:'Sungrow',   kw:5,    fase:'Monofásico 220 V', mppt:2, bat:'AT', preco:6630.90 },
+    { id:'INVDE-H-MO-220-6KW',   marca:'Deye',      kw:6,    fase:'Monofásico 220 V', mppt:2, bat:'BT', preco:5013.61 },
+    { id:'INVHOY-H-MO-220-6KW',  marca:'Hoymiles',  kw:6,    fase:'Monofásico 220 V', mppt:2, bat:'?',  preco:4528.43 },
+    { id:'INVLP-H-MO-220-6KW',   marca:'Luxpower',  kw:6,    fase:'Monofásico 220 V', mppt:2, bat:'BT', preco:3773.69 },
+    { id:'INVSA-H-MO-220-6KW',   marca:'SAJ',       kw:6,    fase:'Monofásico 220 V', mppt:2, bat:'?',  preco:5085.90 },
+    { id:'INVSG-H-MO-220-6KW',   marca:'Sungrow',   kw:6,    fase:'Monofásico 220 V', mppt:2, bat:'AT', preco:7385.64 },
+    { id:'INVFX-H-MO-220-7.5KW', marca:'Fox ESS',   kw:7.5,  fase:'Monofásico 220 V', mppt:3, bat:'AT', preco:10525.25 },
+    { id:'INVSG-H-MO-220-7.5KW', marca:'Sungrow',   kw:7.5,  fase:'Monofásico 220 V', mppt:3, bat:'AT', preco:9885.38 },
+    { id:'INVSG-H-MO-220-10KW',  marca:'Sungrow',   kw:10,   fase:'Monofásico 220 V', mppt:3, bat:'AT', preco:12249.02 },
+    { id:'INVFX-H-MO-220-10.5K', marca:'Fox ESS',   kw:10.5, fase:'Monofásico 220 V', mppt:4, bat:'?',  preco:11167.03 },
+    { id:'INVLP-H-MO-220-10.5K', marca:'Luxpower',  kw:10.5, fase:'Monofásico 220 V', mppt:2, bat:'BT', preco:5930.09 },
+    { id:'INVFX-H-BI-220-5.7KW', marca:'Fox ESS',   kw:5.7,  fase:'Bifásico 127/220 V', mppt:3, bat:'?',  preco:9314.86 },
+    { id:'INVGR-H-BI-220-7.3KW', marca:'Growatt',   kw:7.3,  fase:'Bifásico 127/220 V', mppt:2, bat:'BT', preco:7277.82 },
+    { id:'INVLP-H-BI-220-7.3KW', marca:'Luxpower',  kw:7.3,  fase:'Bifásico 127/220 V', mppt:2, bat:'BT', preco:8625.58 },
+    { id:'INVHOY-H-BI-220-7.5K', marca:'Hoymiles',  kw:7.5,  fase:'Bifásico 127/220 V', mppt:2, bat:'?',  preco:7824.48 },
+    { id:'INVFX-H-BI-220-7.5KW', marca:'Fox ESS',   kw:7.5,  fase:'Bifásico 127/220 V', mppt:3, bat:'?',  preco:12052.70 },
+    { id:'INVGR-H-BI-220-10.5K', marca:'Growatt',   kw:10.5, fase:'Bifásico 127/220 V', mppt:2, bat:'BT', preco:7709.10 },
+    { id:'INVHO-H-BI-220-10.5K', marca:'Hoymiles',  kw:10.5, fase:'Bifásico 127/220 V', mppt:2, bat:'?',  preco:9703.76 },
+    { id:'INVLP-H-BI-220-10.5K', marca:'Luxpower',  kw:10.5, fase:'Bifásico 127/220 V', mppt:2, bat:'BT', preco:13369.66 },
+    { id:'INVGR-H-BI-220-12KW',  marca:'Growatt',   kw:12,   fase:'Bifásico 127/220 V', mppt:2, bat:'BT', preco:8965.54 },
+    { id:'INVDE-H-TR-220V-12KW', marca:'Deye',      kw:12,   fase:'Trifásico 220 V', mppt:2, bat:'AT', preco:13797.63 },
+  ],
+  baterias: [
+    { id:'BATGR-51V-16KWH-BT',  marca:'Growatt',  modelo:'HOPE 16.0LM-A1',   kwh:16,    util:15.3, tensao:51.2, tipo:'BT', preco:13151.88, ciclos:6000, iDescarga:200, garantia:'5 anos (10 anos opcional)' },
+    { id:'BATGR-51V-5.12KWH-BT',marca:'Growatt',  modelo:'HOPE 5.0L-B1',     kwh:5.12,  tensao:51.2, tipo:'BT', preco:4994.40 },
+    { id:'BATDE-51V-5.1KWH-BT', marca:'Deye',     modelo:'SE-F5',            kwh:5.12,  tensao:51.2, tipo:'BT', preco:4994.40 },
+    { id:'BATDY-51V-5.12KWH-BT',marca:'Dyness',   modelo:'DL5.0C',           kwh:5.12,  tensao:51.2, tipo:'BT', preco:4994.40 },
+    { id:'BATLP-51V-16KWH-BT',  marca:'Luxpower (Hinaess)', modelo:'Pgem Max', kwh:16.076, tensao:51.2, tipo:'BT', preco:13151.88 },
+    { id:'BATLP-51V-5.12KWH-BT',marca:'Luxpower (Hinaess)', modelo:'LXP Powergem', kwh:5.12, tensao:51.2, tipo:'BT', preco:5462.62 },
+    { id:'BATSA-51V-5.1KWH-BT', marca:'SAJ',      modelo:'B3-5.0-LV',        kwh:5.12,  tensao:51.2, tipo:'BT', preco:4994.40 },
+    { id:'BATSP-51V-5.12KWH-BT',marca:'Secpower', modelo:'SPLFP 5 E',        kwh:5.12,  tensao:51.2, tipo:'BT', preco:5200.91 },
+    { id:'BATFX-192V-5.2KWH-AT',marca:'Fox ESS',  modelo:'5,18 kWh',         kwh:5.18,  tensao:192,  tipo:'AT', preco:5295.81 },
+    { id:'BATFX-192V-5.7KWH-AT',marca:'Fox ESS',  modelo:'EP6',              kwh:5.76,  tensao:192,  tipo:'AT', preco:5654.09 },
+    { id:'BATFX-384-10.4KWH-AT',marca:'Fox ESS',  modelo:'10,36 kWh',        kwh:10.36, tensao:384,  tipo:'AT', preco:10580.43 },
+    { id:'BATHW-450V-5KW',      marca:'Huawei',   modelo:'LUNA2000-5-S0',    kwh:5,     tensao:450,  tipo:'AT', preco:8602.96 },
+  ],
+};
+const HIB_BAT_PADRAO = 'BATGR-51V-16KWH-BT';
+const HIB_EFIC = 0.92;      // eficiência inversor + bateria na descarga
+const HIB_DOD = 0.9;        // profundidade de descarga quando o datasheet não informa a capacidade útil
+function hibCat(){ return STATE.hibCatalogo && STATE.hibCatalogo.inversores ? STATE.hibCatalogo : HIB_CAT_PADRAO; }
+const invNome = (i)=> i ? `${i.marca} ${fmtKw(i.kw)} kW ${(i.fase||'').charAt(0).toLowerCase()+(i.fase||'').slice(1)}`.trim() : '';
+const batNome = (b)=> b ? `${b.marca} ${b.modelo}` : '';
+const batUtil = (b)=> +b.util || (+b.kwh||0)*HIB_DOD;
 const HIB_CARGAS = [
   { nome:'Geladeira', w:150, uso:40, motor:true },
   { nome:'Freezer', w:200, uso:40, motor:true },
@@ -6102,13 +6137,17 @@ const HIB_PADRAO = [['Geladeira',1],['Lâmpada LED',6],['Roteador de internet',1
 const fmt1 = (v)=>Number(v||0).toLocaleString('pt-BR',{ maximumFractionDigits:1 });
 
 function hibPadrao(){
-  return { ativo:false, inversorId:'', outroModelo:'', outroKw:'', autonomiaH:8, bateriasQtd:'', valorTotal:'', valorBackup:'',
+  return { ativo:false, inversorId:'', outroModelo:'', outroKw:'', bateriaId:HIB_BAT_PADRAO, autonomiaH:8, bateriasQtd:'', valorTotal:'', valorBackup:'',
     cargas: HIB_PADRAO.map(([n,q])=>({ ...HIB_CARGAS.find(c=>c.nome===n), qtd:q })) };
 }
 function hibridoInversor(h){
   if(!h) return null;
-  if(h.inversorId==='outro') return (+h.outroKw>0) ? { id:'outro', modelo:h.outroModelo||'Inversor híbrido', kw:+h.outroKw, fase:'' } : null;
-  return HIB_INVERSORES.find(i=>i.id===h.inversorId) || null;
+  if(h.inversorId==='outro') return (+h.outroKw>0) ? { id:'outro', marca:h.outroModelo||'Inversor híbrido', kw:+h.outroKw, fase:'', bat:'?', preco:0 } : null;
+  return hibCat().inversores.find(i=>i.id===h.inversorId) || null;
+}
+function hibridoBateria(h){
+  const cat = hibCat().baterias;
+  return cat.find(b=>b.id===(h && h.bateriaId)) || cat.find(b=>b.id===HIB_BAT_PADRAO) || cat[0];
 }
 function hibridoCalc(h, kwp, gerMes){
   if(!h || !h.ativo) return null;
@@ -6119,22 +6158,29 @@ function hibridoCalc(h, kwp, gerMes){
   const maiorMotor = cargas.filter(c=>c.motor).reduce((m,c)=>Math.max(m, c.w), 0);
   const partida = pico + 2*maiorMotor;
   const energia = pMedia*T/1000;                                             // kWh
-  const nAuto = Math.max(1, Math.ceil(energia/(BAT.util*HIB_EFIC)));
-  const n = Math.min(BAT.maxParalelo, Math.max(1, parseInt(h.bateriasQtd) || nAuto));
-  const capUtil = n*BAT.util;
+  const bat = hibridoBateria(h), util1 = batUtil(bat);
+  const nAuto = Math.max(1, Math.ceil(energia/(util1*HIB_EFIC)));
+  const n = Math.min(48, Math.max(1, parseInt(h.bateriasQtd) || nAuto));
+  const capUtil = n*util1;
   const autonomia = pMedia>0 ? capUtil*HIB_EFIC/(pMedia/1000) : 0;           // h
   const inv = hibridoInversor(h);
-  const corrente = pico/(HIB_EFIC*48);                                       // A na bateria (pior caso)
+  const corrente = bat.tipo==='BT' ? pico/(HIB_EFIC*48) : 0;                 // A na bateria (pior caso)
   const gerDia = (gerMes||0)/30.42;
-  const sugerido = HIB_INVERSORES.filter(i=>i.kw*1000 >= pico*1.2).sort((a,b)=>a.kw-b.kw)[0] || null;
+  const inv0 = hibridoInversor(h);
+  const cabem = hibCat().inversores.filter(i=>i.kw*1000 >= pico*1.2 && (i.bat===bat.tipo || i.bat==='?') && (!inv0 || !inv0.fase || i.fase===inv0.fase));
+  const sugerido = cabem.slice().sort((a,b)=>a.kw-b.kw || a.preco-b.preco)[0] || null;
+  const maisBarato = cabem.slice().sort((a,b)=>a.preco-b.preco)[0] || null;
+  const custo = (inv && inv.preco ? +inv.preco : 0) + n*(+bat.preco||0);
   const alertas = [];
   if(inv && pico > inv.kw*1000) alertas.push(`Com todas as cargas ligadas juntas (${fmtInt(pico)} W) passa da potência do inversor (${fmtKw(inv.kw)} kW). Escolha um inversor maior ou tire cargas do backup.`);
-  else if(inv && partida > inv.kw*1000*1.5) alertas.push(`A partida dos motores pode chegar a ${fmtInt(partida)} W. Confira a capacidade de pico do ${inv.modelo} no datasheet.`);
-  if(corrente > n*BAT.iDescarga) alertas.push(`A corrente na bateria (${fmtInt(corrente)} A) passa do limite de ${n*BAT.iDescarga} A. Aumente o número de baterias.`);
-  if(inv && kwp > inv.kw*1.5) alertas.push(`Os módulos (${fmtKw(kwp)} kWp) passam de 1,5× a potência do inversor. Confira a potência FV máxima do ${inv.modelo} no datasheet.`);
+  else if(inv && partida > inv.kw*1000*1.5) alertas.push(`A partida dos motores pode chegar a ${fmtInt(partida)} W. Confira a capacidade de pico do inversor ${invNome(inv)} no datasheet.`);
+  if(inv && inv.bat && inv.bat!=='?' && inv.bat!==bat.tipo) alertas.push(`O inversor ${invNome(inv)} trabalha com bateria de ${inv.bat==='BT'?'baixa tensão (48 V)':'alta tensão'} e a ${batNome(bat)} é de ${bat.tipo==='BT'?'baixa tensão (51,2 V)':'alta tensão ('+bat.tensao+' V)'}. Eles não são compatíveis.`);
+  else if(inv && inv.bat==='?') alertas.push(`Confira no datasheet se o inversor ${invNome(inv)} é compatível com a bateria ${batNome(bat)}.`);
+  if(bat.iDescarga && corrente > n*bat.iDescarga) alertas.push(`A corrente na bateria (${fmtInt(corrente)} A) passa do limite de ${n*bat.iDescarga} A. Aumente o número de baterias.`);
+  if(inv && kwp > inv.kw*1.5) alertas.push(`Os módulos (${fmtKw(kwp)} kWp) passam de 1,5× a potência do inversor. Confira a potência FV máxima do inversor no datasheet.`);
   if(cargas.some(c=>/chuveiro/i.test(c.nome))) alertas.push('Chuveiro elétrico gasta muito e derruba a autonomia. O ideal é deixá-lo fora do quadro de backup.');
   if(parseInt(h.bateriasQtd) && parseInt(h.bateriasQtd) < nAuto) alertas.push(`Com ${n} bateria${n>1?'s':''}, a autonomia fica abaixo das ${T} h desejadas (o cálculo pede ${nAuto}).`);
-  return { T, cargas, pMedia, pico, partida, energia, nAuto, n, capUtil, autonomia, inv, corrente, gerDia, sugerido, alertas,
+  return { T, cargas, pMedia, pico, partida, energia, nAuto, n, capUtil, autonomia, inv, bat, corrente, gerDia, sugerido, maisBarato, custo, alertas,
     valorBackup: +h.valorBackup || 0 };
 }
 /* aplica no cálculo da proposta (descrição do kit + resumo) */
@@ -6142,8 +6188,9 @@ function hibridoAplicar(calc, anexarDescricao){
   const h = calc.hibridoIn;
   calc.hibrido = h ? hibridoCalc(h, calc.kwp, calc.geracaoMediaMensal) : null;
   if(!calc.hibrido || !anexarDescricao) return;
-  const hb = calc.hibrido, linhas = [`${hb.n}× Bateria ${BAT.modelo} – LiFePO4 ${String(BAT.tensao).replace('.',',')} V, 16 kWh (15,3 kWh úteis)`];
-  if(hb.inv) linhas.push(`1× Inversor híbrido ${hb.inv.modelo} – ${fmtKw(hb.inv.kw)} kW`);
+  const hb = calc.hibrido, b = hb.bat;
+  const linhas = [`${hb.n}× Bateria de lítio ${batNome(b)} – ${fmtKw(b.tensao)} V, ${fmtKw(b.kwh)} kWh`];
+  if(hb.inv) linhas.push(`1× Inversor híbrido ${invNome(hb.inv)}`);
   linhas.push('Quadro de cargas essenciais (backup) com proteções');
   calc.descricao = (calc.descricao ? calc.descricao + '\n' : '') + linhas.join('\n');
 }
@@ -6173,11 +6220,14 @@ function hibResumoHtml(){
   if(!hb.cargas.length) return `<div class="help">Adicione as cargas que devem continuar ligadas quando a energia cair.</div>`;
   return `<div class="hib-res">
       <div><b>${fmt1(hb.energia)} kWh</b><span>energia para ${hb.T} h de falta</span></div>
-      <div><b>${hb.n} bateria${hb.n>1?'s':''}</b><span>${parseInt(h.bateriasQtd) ? 'definido por você' : 'calculado'} · ${fmt1(hb.capUtil)} kWh úteis</span></div>
+      <div><b>${hb.n} bateria${hb.n>1?'s':''}</b><span>${parseInt(h.bateriasQtd) ? 'definido por você' : 'calculado'} · ${fmt1(hb.capUtil)} kWh úteis${hb.bat.util?'':' (est.)'}</span></div>
       <div><b>${fmt1(hb.autonomia)} h</b><span>autonomia estimada</span></div>
       <div><b>${fmtInt(hb.pico)} W</b><span>todas ligadas juntas</span></div>
     </div>
-    ${hb.sugerido ? `<div class="help">Inversor mínimo para estas cargas: <b>${esc(hb.sugerido.modelo)}</b> (${fmtKw(hb.sugerido.kw)} kW, ${esc(hb.sugerido.fase)}).${hb.gerDia ? ` Um dia médio de sol gera cerca de ${fmt1(hb.gerDia)} kWh para recarregar as baterias.` : ''}</div>` : ''}
+    <div class="help">${hb.sugerido ? `Menor inversor compatível${hb.inv && hb.inv.fase ? ' ('+hb.inv.fase.split(' ')[0].toLowerCase()+')' : ''} que atende estas cargas: <b>${esc(invNome(hb.sugerido))}</b>${hb.sugerido.preco?' (R$ '+fmtMoney(hb.sugerido.preco)+')':''}.` : ''}
+      ${hb.maisBarato && hb.maisBarato!==hb.sugerido ? ` O mais barato que atende: <b>${esc(invNome(hb.maisBarato))}</b> (R$ ${fmtMoney(hb.maisBarato.preco)}).` : ''}
+      ${hb.custo ? `<br>Custo de tabela do backup: ${hb.inv && hb.inv.preco ? 'inversor R$ '+fmtMoney(hb.inv.preco)+' + ' : ''}${hb.n} × bateria R$ ${fmtMoney(hb.bat.preco)} = <b>R$ ${fmtMoney(hb.custo)}</b> (só para você, não aparece na proposta).` : ''}
+      ${hb.gerDia ? `<br>Um dia médio de sol gera cerca de ${fmt1(hb.gerDia)} kWh para recarregar as baterias.` : ''}</div>
     ${hb.alertas.map(a=>`<div class="hib-alerta">⚠️ ${esc(a)}</div>`).join('')}`;
 }
 function hibridoCardHtml(){
@@ -6197,12 +6247,18 @@ function hibridoCardHtml(){
       <div class="radio-opt ${on?'selected':''}" onclick="setHibrido(true)">Híbrido com bateria (backup)</div>
     </div>
     ${on ? `
-    <div class="sub">Bateria: <b>${BAT.modelo}</b> · LiFePO4 · 51,2 V · 16 kWh (15,3 kWh úteis) · 6.000 ciclos · garantia ${BAT.garantia}.</div>
     <div class="row">
+      <div class="field" style="flex:2"><label for="hib-bat">Bateria *</label>
+        <select id="hib-bat" onchange="hibCampo('bateriaId',this.value,true)">
+          ${hibCat().baterias.map(b=>`<option value="${b.id}" ${hibridoBateria(h).id===b.id?'selected':''}>${esc(batNome(b))} — ${fmtKw(b.kwh)} kWh · ${fmtKw(b.tensao)} V (${b.tipo==='BT'?'baixa tensão':'alta tensão'})${b.preco?' · R$ '+fmtMoney(b.preco):''}</option>`).join('')}
+        </select></div>
       <div class="field" style="flex:2"><label for="hib-inv">Inversor híbrido *</label>
         <select id="hib-inv" onchange="hibCampo('inversorId',this.value,true)">
           <option value="">Selecione...</option>
-          ${HIB_INVERSORES.map(i=>`<option value="${i.id}" ${h.inversorId===i.id?'selected':''}>${esc(i.modelo)} — ${fmtKw(i.kw)} kW (${esc(i.fase)})</option>`).join('')}
+          ${(()=>{ const bt = hibridoBateria(h).tipo, invs = hibCat().inversores.slice().sort((a,b)=>a.kw-b.kw||a.preco-b.preco);
+            const op = (i)=>`<option value="${i.id}" ${h.inversorId===i.id?'selected':''}>${esc(invNome(i))}${i.mppt?' · '+i.mppt+' MPPT':''}${i.preco?' · R$ '+fmtMoney(i.preco):''}${i.bat==='?'?' (confirmar compatibilidade)':''}</option>`;
+            const ok = invs.filter(i=>i.bat===bt||i.bat==='?'), nao = invs.filter(i=>!(i.bat===bt||i.bat==='?'));
+            return `<optgroup label="Compatíveis com a bateria escolhida">${ok.map(op).join('')}</optgroup>${nao.length?`<optgroup label="Outra tensão de bateria">${nao.map(op).join('')}</optgroup>`:''}`; })()}
           <option value="outro" ${h.inversorId==='outro'?'selected':''}>Outro modelo...</option>
         </select></div>
       <div class="field"><label for="hib-aut">Autonomia desejada</label>
@@ -6211,7 +6267,7 @@ function hibridoCardHtml(){
         </select></div>
     </div>
     ${h.inversorId==='outro' ? `<div class="row">
-      <div class="field" style="flex:2"><label for="hib-omod">Modelo do inversor</label><input id="hib-omod" value="${esc(h.outroModelo||'')}" oninput="hibCampo('outroModelo',this.value)"></div>
+      <div class="field" style="flex:2"><label for="hib-omod">Marca e modelo do inversor</label><input id="hib-omod" value="${esc(h.outroModelo||'')}" oninput="hibCampo('outroModelo',this.value)"></div>
       <div class="field"><label for="hib-okw">Potência (kW) *</label><input id="hib-okw" type="number" step="0.1" min="0" value="${h.outroKw||''}" oninput="hibCampo('outroKw',this.value)"></div>
     </div>` : ''}
     <div class="ss-lbl" style="font-weight:700;margin:12px 0 6px">Cargas essenciais (ficam ligadas quando a energia cai)</div>
@@ -6269,9 +6325,85 @@ function hibridoValidar(){
   if(!(h.cargas||[]).some(c=>+c.qtd>0 && +c.w>0)){ toast('Adicione pelo menos uma carga essencial para o backup.'); return false; }
   if(!(+h.valorTotal>0)){ toast('Informe o valor total do sistema híbrido.'); return false; }
   const inv = hibridoInversor(h), ce = WIZ.contratoEquip;
-  if(!ce.inversoresModeloTexto){ ce.inversoresModeloTexto = inv.modelo; ce.inversoresPotenciaKw = inv.kw; ce.inversoresQtd = ce.inversoresQtd || 1; ce.inversoresTipo = 'string'; }
+  if(!ce.inversoresModeloTexto){ ce.inversoresModeloTexto = invNome(inv); ce.inversoresPotenciaKw = inv.kw; ce.inversoresQtd = ce.inversoresQtd || 1; ce.inversoresTipo = 'string'; }
   return true;
 }
+/* ---------- Configurações → lista de inversores e baterias ---------- */
+const HCAT_FASES = ['Monofásico 220 V','Bifásico 127/220 V','Trifásico 220 V','Trifásico 380 V'];
+function hcatInvRow(i){
+  i = i || { id:'', marca:'', kw:'', fase:'Monofásico 220 V', mppt:'', bat:'BT', preco:'' };
+  const fases = HCAT_FASES.includes(i.fase) ? HCAT_FASES : [i.fase, ...HCAT_FASES];
+  return `<tr>
+    <td><input data-k="id" value="${esc(i.id)}" aria-label="Código"></td>
+    <td><input data-k="marca" value="${esc(i.marca)}" aria-label="Marca"></td>
+    <td><input data-k="kw" type="number" step="0.1" min="0" value="${i.kw}" aria-label="Potência em kW"></td>
+    <td><select data-k="fase" aria-label="Ligação">${fases.map(f=>`<option ${f===i.fase?'selected':''}>${esc(f)}</option>`).join('')}</select></td>
+    <td><input data-k="mppt" type="number" min="0" value="${i.mppt||''}" aria-label="MPPT"></td>
+    <td><select data-k="bat" aria-label="Tensão de bateria">${[['BT','Baixa (48 V)'],['AT','Alta'],['?','Confirmar']].map(([v,l])=>`<option value="${v}" ${v===i.bat?'selected':''}>${l}</option>`).join('')}</select></td>
+    <td><input data-k="preco" type="number" step="0.01" min="0" value="${i.preco||''}" aria-label="Preço"></td>
+    <td class="c"><button type="button" class="btn btn-danger btn-sm" onclick="this.closest('tr').remove()" aria-label="Remover">×</button></td></tr>`;
+}
+function hcatBatRow(b){
+  b = b || { id:'', marca:'', modelo:'', kwh:'', util:'', tensao:51.2, tipo:'BT', preco:'' };
+  return `<tr>
+    <td><input data-k="id" value="${esc(b.id)}" aria-label="Código"></td>
+    <td><input data-k="marca" value="${esc(b.marca)}" aria-label="Marca"></td>
+    <td><input data-k="modelo" value="${esc(b.modelo)}" aria-label="Modelo"></td>
+    <td><input data-k="kwh" type="number" step="0.01" min="0" value="${b.kwh}" aria-label="kWh nominais"></td>
+    <td><input data-k="util" type="number" step="0.01" min="0" value="${b.util||''}" placeholder="${b.kwh?fmtKw(b.kwh*HIB_DOD):''}" aria-label="kWh úteis"></td>
+    <td><input data-k="tensao" type="number" step="0.1" min="0" value="${b.tensao}" aria-label="Tensão"></td>
+    <td><select data-k="tipo" aria-label="Tipo">${[['BT','Baixa'],['AT','Alta']].map(([v,l])=>`<option value="${v}" ${v===b.tipo?'selected':''}>${l}</option>`).join('')}</select></td>
+    <td><input data-k="preco" type="number" step="0.01" min="0" value="${b.preco||''}" aria-label="Preço"></td>
+    <td class="c"><button type="button" class="btn btn-danger btn-sm" onclick="this.closest('tr').remove()" aria-label="Remover">×</button></td></tr>`;
+}
+function viewHibCatalogoConfig(){
+  const c = hibCat();
+  return `<div class="sub">Lista usada nas propostas com sistema híbrido. Atualize os preços quando a tabela do distribuidor mudar. Os preços aparecem só para você, como custo de referência; nunca vão para a proposta.</div>
+    <div class="ss-lbl" style="font-weight:700;margin:10px 0 6px">Inversores híbridos</div>
+    <div class="hib-tab-wrap"><table class="hib-tab" id="hcat-inv">
+      <tr><th>Código</th><th>Marca</th><th>kW</th><th>Ligação</th><th>MPPT</th><th>Bateria</th><th>Preço (R$)</th><th></th></tr>
+      ${c.inversores.map(hcatInvRow).join('')}
+    </table></div>
+    <button type="button" class="btn btn-outline btn-sm" style="margin-top:6px" onclick="document.getElementById('hcat-inv').insertAdjacentHTML('beforeend', hcatInvRow())">+ Inversor</button>
+    <div class="ss-lbl" style="font-weight:700;margin:16px 0 6px">Baterias</div>
+    <div class="hib-tab-wrap"><table class="hib-tab" id="hcat-bat">
+      <tr><th>Código</th><th>Marca</th><th>Modelo</th><th>kWh</th><th>kWh úteis</th><th>Tensão (V)</th><th>Tensão</th><th>Preço (R$)</th><th></th></tr>
+      ${c.baterias.map(hcatBatRow).join('')}
+    </table></div>
+    <button type="button" class="btn btn-outline btn-sm" style="margin-top:6px" onclick="document.getElementById('hcat-bat').insertAdjacentHTML('beforeend', hcatBatRow())">+ Bateria</button>
+    <div class="help">"kWh úteis": se deixar em branco, o cálculo usa 90% da capacidade nominal. "Bateria" do inversor: a tensão de bateria que ele aceita; o gerador avisa quando a bateria escolhida não combina.</div>
+    <div class="row" style="gap:8px;margin-top:10px">
+      <button type="button" class="btn btn-primary" onclick="hcatSalvar()">Salvar lista</button>
+      <button type="button" class="btn btn-outline" onclick="hcatRestaurar()">Restaurar lista original</button>
+    </div>`;
+}
+function hcatLer(tabId){
+  return [...document.querySelectorAll(`#${tabId} tr`)].slice(1).map(tr=>{
+    const o = {};
+    tr.querySelectorAll('[data-k]').forEach(el=>{ o[el.dataset.k] = el.value.trim(); });
+    return o;
+  });
+}
+window.hcatSalvar = async ()=>{
+  const ant = hibCat();
+  const num = (v)=> v==='' || v==null ? '' : +String(v).replace(',','.');
+  const inversores = hcatLer('hcat-inv').filter(i=>i.marca && num(i.kw)>0).map((i,k)=>({ ...(ant.inversores.find(x=>x.id===i.id)||{}),
+    id: i.id || ('INV-' + Date.now() + '-' + k), marca:i.marca, kw:num(i.kw), fase:i.fase, mppt:num(i.mppt)||'', bat:i.bat, preco:num(i.preco)||0 }));
+  const baterias = hcatLer('hcat-bat').filter(b=>b.marca && num(b.kwh)>0).map((b,k)=>({ ...(ant.baterias.find(x=>x.id===b.id)||{}),
+    id: b.id || ('BAT-' + Date.now() + '-' + k), marca:b.marca, modelo:b.modelo, kwh:num(b.kwh), util:num(b.util)||'', tensao:num(b.tensao)||51.2, tipo:b.tipo, preco:num(b.preco)||0 }));
+  if(!inversores.length || !baterias.length){ toast('Deixe pelo menos um inversor e uma bateria na lista.'); return; }
+  STATE.hibCatalogo = { inversores, baterias };
+  await saveKey('hibCatalogo', STATE.hibCatalogo);
+  toast(`Lista salva: ${inversores.length} inversores e ${baterias.length} baterias.`);
+};
+window.hcatRestaurar = async ()=>{
+  if(!confirm('Voltar para a lista original de inversores e baterias? Os preços que você mudou serão perdidos.')) return;
+  STATE.hibCatalogo = null;
+  await saveKey('hibCatalogo', null);
+  renderMain();
+  toast('Lista original restaurada.');
+};
+
 
 function pdfFrame(numero, page, kicker, title, sub, body){
   const S = propSettings();
@@ -6376,7 +6508,7 @@ function pdfPagesHtml(calc, pagamento){
   const resumoEq = [];
   if(modQtd || ce.modulosModelo) resumoEq.push(['Módulos fotovoltaicos', ce.modulosModelo||dash, modQtd||dash, `${S.garantiaModProduto} / ${S.garantiaModPerformance} anos*`]);
   if(invQtd || ce.inversoresModeloTexto) resumoEq.push([calc.hibrido ? 'Inversor híbrido' : ce.inversoresTipo==='micro'?'Microinversor':'Inversor', [ce.inversoresModeloTexto, ce.inversoresPotenciaKw?(ce.inversoresPotenciaKw+' kW'):''].filter(Boolean).join(' – ')||dash, invQtd||dash, `${S.garantiaInversor} anos`]);
-  if(calc.hibrido) resumoEq.push(['Bateria (backup)', `${BAT.modelo} – LiFePO4 51,2 V · 16 kWh`, String(calc.hibrido.n), BAT.garantia.replace(' (10 anos opcional)','')]);
+  if(calc.hibrido) resumoEq.push(['Bateria (backup)', `${batNome(calc.hibrido.bat)} – ${fmtKw(calc.hibrido.bat.tensao)} V · ${fmtKw(calc.hibrido.bat.kwh)} kWh`, String(calc.hibrido.n), calc.hibrido.bat.garantia ? calc.hibrido.bat.garantia.replace(' (10 anos opcional)','') : '—']);
   const servicos = (S.servicos||'').split('\n').map(s=>s.trim()).filter(Boolean);
   const fsz = linhasEq.length > 10 ? 10.5 : 12;
   const sistema = pdfFrame(numero, 5, '04 &nbsp;•&nbsp; SISTEMA PROPOSTO', 'Equipamentos e serviços inclusos', `${esc(calc.nomeKit||'Sistema fotovoltaico')} — ${calc.kwp.toFixed(2).replace('.',',')} kWp`, `
@@ -6401,9 +6533,9 @@ function pdfPagesHtml(calc, pagamento){
   /* 5c. BACKUP COM BATERIAS */
   const hb = calc.hibrido;
   const backupPg = (hb && hb.cargas.length) ? pdfFrame(numero, 0, '04 &nbsp;•&nbsp; SISTEMA PROPOSTO', 'Energia mesmo quando a rede cai',
-    `Sistema híbrido com ${hb.n} bateria${hb.n>1?'s':''} de 16 kWh${hb.inv ? ' e inversor ' + esc(hb.inv.modelo) : ''}`, `
+    `Sistema híbrido com ${hb.n} bateria${hb.n>1?'s':''} ${esc(batNome(hb.bat))}${hb.inv ? ' e inversor ' + esc(invNome(hb.inv)) : ''}`, `
     <div class="ss-stats4">
-      ${[[fmt1(hb.autonomia)+' h','autonomia estimada*'],[fmt1(hb.capUtil)+' kWh','energia armazenada (útil)'],[hb.n+'×','bateria'+(hb.n>1?'s':'')+' de 16 kWh'],[hb.inv?fmtKw(hb.inv.kw)+' kW':'–','inversor híbrido']]
+      ${[[fmt1(hb.autonomia)+' h','autonomia estimada*'],[fmt1(hb.capUtil)+' kWh','energia armazenada (útil)'],[hb.n+'×','bateria'+(hb.n>1?'s':'')+' de '+fmtKw(hb.bat.kwh)+' kWh'],[hb.inv?fmtKw(hb.inv.kw)+' kW':'–','inversor híbrido']]
         .map(([v,l])=>`<div><div class="sv">${v}</div><div class="sl">${l}</div></div>`).join('')}
     </div>
     <div class="ss-label">O QUE FICA LIGADO QUANDO A ENERGIA CAI</div>
@@ -6414,8 +6546,8 @@ function pdfPagesHtml(calc, pagamento){
     <div class="ss-checks">${[
       'Quando a energia da rede cai, o inversor híbrido desliga a casa da rede e passa a alimentar esses equipamentos pelas baterias, de forma automática.',
       `Durante o dia, os módulos solares abastecem a casa e recarregam as baterias${hb.gerDia ? ` (um dia médio de sol gera cerca de ${fmt1(hb.gerDia)} kWh)` : ''}.`,
-      'Baterias de lítio-ferro-fosfato (LiFePO4): seguras, sem manutenção e com vida útil de 6.000 ciclos.',
-      `Garantia das baterias: ${BAT.garantia}.`
+      `Baterias de lítio: seguras, sem manutenção${hb.bat.ciclos ? ` e com vida útil de ${fmtInt(hb.bat.ciclos)} ciclos` : ' e com longa vida útil'}.`,
+      hb.bat.garantia ? `Garantia das baterias: ${hb.bat.garantia}.` : 'Garantia das baterias conforme o fabricante.'
     ].map(s=>`<div>${pdfCircle('check','#22C55E',22)}<span>${esc(s)}</span></div>`).join('')}</div>
     ${hb.paybackSolar ? `<div class="ss-note" style="font-size:12px;color:#0B1F4B"><b>Retorno da parte solar (sem o backup): ${fmtAnosMeses(hb.paybackSolar)}.</b> O retorno da página seguinte considera o valor total, com as baterias.</div>` : ''}
     <div class="ss-note">* Estimativa para os equipamentos e o tempo de uso acima, com as baterias carregadas no início da falta. A autonomia real varia com o uso. Equipamentos de alto consumo (chuveiro elétrico, forno, ar-condicionado) reduzem bastante a autonomia.</div>`) : '';
