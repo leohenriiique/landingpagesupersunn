@@ -244,6 +244,22 @@ select.form-mode{border:1.5px solid var(--navy);}
 }
 .ss-roof img{display:block;width:100%;border-radius:14px;}
 
+
+/* ---- Sistema híbrido ---- */
+.hib-tab-wrap{overflow-x:auto;}
+.hib-tab{width:100%;border-collapse:collapse;font-size:13px;}
+.hib-tab th{text-align:left;font-weight:700;color:var(--muted);font-size:12px;padding:4px 6px;border-bottom:1px solid var(--line);}
+.hib-tab td{padding:4px 6px;border-bottom:1px solid var(--line);}
+.hib-tab td input:not([type=checkbox]){width:100%;min-width:60px;padding:6px 8px;}
+.hib-tab td:first-child input{min-width:170px;}
+.hib-tab .c{text-align:center;}
+.hib-res{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:12px 0 8px;}
+.hib-res>div{background:var(--cyan-light);border-radius:10px;padding:10px 12px;}
+.hib-res b{display:block;font-size:17px;color:var(--navy-dark);}
+.hib-res span{font-size:12px;color:var(--muted);}
+.hib-alerta{margin:6px 0;padding:8px 10px;border-radius:9px;background:rgba(220,38,38,.09);color:#b42318;font-size:13px;}
+@media(max-width:700px){.hib-res{grid-template-columns:repeat(2,1fr);}}
+
 .modal-overlay{position:fixed;inset:0;background:rgba(10,30,40,.45);display:flex;align-items:center;justify-content:center;z-index:900;padding:20px;}
 .modal-box{background:#fff;border-radius:14px;max-width:520px;width:100%;max-height:85vh;overflow:auto;padding:22px 24px;box-shadow:0 10px 40px rgba(0,0,0,.3);}
 .modal-box h3{margin:0 0 4px;color:var(--navy-dark);font-size:17px;}
@@ -4281,6 +4297,8 @@ function stepKit(){
     `}
   </div>
 
+  ${hibridoCardHtml()}
+
   <div class="card">
     <h2>Dados dos equipamentos para o contrato</h2>
     <div class="sub">Usados para preencher automaticamente o quadro-resumo do contrato de prestação de serviços.</div>
@@ -4573,6 +4591,7 @@ window.wizNext = (fromStep)=>{
       inversoresPotenciaKw: document.getElementById('wiz-ce-invpot').value,
       inversoresModeloTexto: document.getElementById('wiz-ce-invmodelo').value,
     };
+    if(!hibridoValidar()) return;
     if(WIZ.temAdequacaoPadrao){
       WIZ.adequacaoOrientacao = document.getElementById('wiz-adeq-orientacao').value;
       const av = parseFloat(document.getElementById('wiz-adeq-valor').value);
@@ -4661,6 +4680,7 @@ function computeCurrentProposal(){
     nomeKit = kit.nome;
   }
 
+  if(WIZ.hibrido && WIZ.hibrido.ativo && +WIZ.hibrido.valorTotal>0) valor = +WIZ.hibrido.valorTotal;
   const pr = WIZ.performanceRatio||0.78;
   const geracaoMensalArr = DAYS_IN_MONTH.map(d => kwp * irr.hsp * d * pr);
   const geracaoMediaMensal = geracaoMensalArr.reduce((a,b)=>a+b,0)/12;
@@ -4678,10 +4698,13 @@ function computeCurrentProposal(){
   const calc = {
     client, consumoMensalArr, consumoMedia, irr, kwp, descricao: descricaoFinal, valor, nomeKit,
     geracaoMensalArr, geracaoMediaMensal, investimento, adequacaoPadrao, pr, contratoEquip: WIZ.contratoEquip,
-    telhado: telhadoContagem(WIZ.telhado) ? WIZ.telhado : null
+    telhado: telhadoContagem(WIZ.telhado) ? WIZ.telhado : null,
+    hibridoIn: (WIZ.hibrido && WIZ.hibrido.ativo) ? WIZ.hibrido : null
   };
+  hibridoAplicar(calc, true);
   calc.finInputs = finInputsFrom(WIZ.fin, client);
   calc.fin = computeFin(calc, calc.finInputs, new Date());
+  hibridoRetornoSolar(calc);
   return calc;
 }
 
@@ -4748,6 +4771,7 @@ function buildProposalRecord(calc, pagamento){
       economiaTotal: calc.fin.economiaTotal, tir: calc.fin.tir, roi: calc.fin.roi } : null,
     contratoEquip: WIZ.contratoEquip,
     telhado: calc.telhado || null,
+    hibrido: calc.hibridoIn || null,
     pagamento,
     status: 'Enviada', versionOf: null, versionNumber: 1
   });
@@ -4881,11 +4905,13 @@ window.regeneratePdf = async(id, btn)=>{
       kwp:p.kwp, descricao:p.descricao, nomeKit:p.nomeKit, valor:p.valor,
       geracaoMensalArr:p.geracaoMensalArr, geracaoMediaMensal:p.geracaoMediaMensal,
       investimento: p.pagamento ? p.pagamento.vista : (p.investimento || p.valor),
-      pr: p.pr, contratoEquip: p.contratoEquip || {}, telhado: p.telhado || null,
+      pr: p.pr, contratoEquip: p.contratoEquip || {}, telhado: p.telhado || null, hibridoIn: p.hibrido || null,
       numero: p.numero || '—', dataEmissao: p.dataEmissao || p.createdAt, consultor: p.consultor || ''
     };
     calc.finInputs = p.finInputs || finInputsFrom({}, client);
     calc.fin = computeFin(calc, calc.finInputs, new Date(calc.dataEmissao || Date.now()));
+    hibridoAplicar(calc, false);
+    hibridoRetornoSolar(calc);
     await buildAndDownloadPdf(calc, p.pagamento);
   });
 };
@@ -6026,6 +6052,227 @@ document.addEventListener('submit', async (e)=>{
   }catch(err){ out.textContent = '❌ ' + err.message; }
 });
 
+
+/* =========================================================================
+   SISTEMA HÍBRIDO — backup em queda de energia
+   Bateria: Growatt HOPE 16.0LM-A1 (datasheet): LiFePO4, 51,2 V, 16 kWh nominais,
+   15,3 kWh utilizáveis, DOD 95%, 150 A carga / 200 A descarga, 6.000 ciclos,
+   garantia 5 anos (10 opcional), até 48 em paralelo, 120 kg, 440×894×265 mm.
+   Cálculo:
+   • energia na falta = Σ qtd × potência × (uso %) × horas de autonomia desejadas
+   • baterias = energia ÷ (15,3 kWh × 92% de eficiência do inversor/bateria), para cima
+   • autonomia real = baterias × 15,3 × 92% ÷ potência média
+   • pico = todas as cargas ligadas juntas (tem de caber no inversor);
+     partida = pico + 2 × maior motor (motores puxam ~3× na partida)
+   ========================================================================= */
+const BAT = { modelo:'Growatt HOPE 16.0LM-A1', quimica:'LiFePO4', tensao:51.2, nominal:16, util:15.3, dod:95,
+  iCarga:150, iDescarga:200, ciclos:6000, garantia:'5 anos (10 anos opcional)', maxParalelo:48, peso:120 };
+const HIB_EFIC = 0.92;
+const HIB_INVERSORES = [
+  { id:'spe6000',  modelo:'Growatt SPE 6000US',     kw:6,   fase:'bifásico 127/220 V' },
+  { id:'spe7500',  modelo:'Growatt SPE 7500US',     kw:7.5, fase:'bifásico 127/220 V' },
+  { id:'spe8000',  modelo:'Growatt SPE 8000US',     kw:8,   fase:'bifásico 127/220 V' },
+  { id:'spe10000', modelo:'Growatt SPE 10000US',    kw:10,  fase:'bifásico 127/220 V' },
+  { id:'spe12000', modelo:'Growatt SPE 12000US',    kw:12,  fase:'bifásico 127/220 V' },
+  { id:'sph10000', modelo:'Growatt SPH 10000TL-HU', kw:10,  fase:'monofásico 220 V ou bifásico 127/220 V' },
+  { id:'wit15',    modelo:'Growatt WIT 15K-HU',     kw:15,  fase:'trifásico 220/380 V' },
+  { id:'wit20',    modelo:'Growatt WIT 20K-HU',     kw:20,  fase:'trifásico 220/380 V' },
+  { id:'wit30',    modelo:'Growatt WIT 30K-HU',     kw:30,  fase:'trifásico 220/380 V' },
+  { id:'wit50',    modelo:'Growatt WIT 50K-HU',     kw:50,  fase:'trifásico 220/380 V' },
+];
+/* w = potência (W); uso = % do tempo ligado durante a falta; motor = partida forte */
+const HIB_CARGAS = [
+  { nome:'Geladeira', w:150, uso:40, motor:true },
+  { nome:'Freezer', w:200, uso:40, motor:true },
+  { nome:'Lâmpada LED', w:10, uso:60, motor:false },
+  { nome:'Roteador de internet', w:15, uso:100, motor:false },
+  { nome:'TV', w:100, uso:50, motor:false },
+  { nome:'Ventilador', w:80, uso:70, motor:false },
+  { nome:'Computador / notebook', w:100, uso:50, motor:false },
+  { nome:'Câmeras / alarme', w:30, uso:100, motor:false },
+  { nome:'Portão eletrônico', w:400, uso:2, motor:true },
+  { nome:'Bomba d\'água 1/2 cv', w:500, uso:10, motor:true },
+  { nome:'Micro-ondas', w:1200, uso:3, motor:false },
+  { nome:'Máquina de lavar', w:500, uso:5, motor:true },
+  { nome:'Ar-condicionado 9.000 BTU inverter', w:800, uso:60, motor:true },
+  { nome:'Ar-condicionado 12.000 BTU inverter', w:1100, uso:60, motor:true },
+  { nome:'Chuveiro elétrico', w:6500, uso:5, motor:false },
+];
+const HIB_PADRAO = [['Geladeira',1],['Lâmpada LED',6],['Roteador de internet',1],['TV',1],['Ventilador',2]];
+const fmt1 = (v)=>Number(v||0).toLocaleString('pt-BR',{ maximumFractionDigits:1 });
+
+function hibPadrao(){
+  return { ativo:false, inversorId:'', outroModelo:'', outroKw:'', autonomiaH:8, bateriasQtd:'', valorTotal:'', valorBackup:'',
+    cargas: HIB_PADRAO.map(([n,q])=>({ ...HIB_CARGAS.find(c=>c.nome===n), qtd:q })) };
+}
+function hibridoInversor(h){
+  if(!h) return null;
+  if(h.inversorId==='outro') return (+h.outroKw>0) ? { id:'outro', modelo:h.outroModelo||'Inversor híbrido', kw:+h.outroKw, fase:'' } : null;
+  return HIB_INVERSORES.find(i=>i.id===h.inversorId) || null;
+}
+function hibridoCalc(h, kwp, gerMes){
+  if(!h || !h.ativo) return null;
+  const T = Math.max(1, +h.autonomiaH || 8);
+  const cargas = (h.cargas||[]).filter(c=>+c.qtd>0 && +c.w>0).map(c=>({ ...c, qtd:+c.qtd, w:+c.w, uso:Math.min(100, Math.max(0, +c.uso||0)) }));
+  const pMedia = cargas.reduce((s,c)=>s + c.qtd*c.w*c.uso/100, 0);           // W
+  const pico = cargas.reduce((s,c)=>s + c.qtd*c.w, 0);                       // W
+  const maiorMotor = cargas.filter(c=>c.motor).reduce((m,c)=>Math.max(m, c.w), 0);
+  const partida = pico + 2*maiorMotor;
+  const energia = pMedia*T/1000;                                             // kWh
+  const nAuto = Math.max(1, Math.ceil(energia/(BAT.util*HIB_EFIC)));
+  const n = Math.min(BAT.maxParalelo, Math.max(1, parseInt(h.bateriasQtd) || nAuto));
+  const capUtil = n*BAT.util;
+  const autonomia = pMedia>0 ? capUtil*HIB_EFIC/(pMedia/1000) : 0;           // h
+  const inv = hibridoInversor(h);
+  const corrente = pico/(HIB_EFIC*48);                                       // A na bateria (pior caso)
+  const gerDia = (gerMes||0)/30.42;
+  const sugerido = HIB_INVERSORES.filter(i=>i.kw*1000 >= pico*1.2).sort((a,b)=>a.kw-b.kw)[0] || null;
+  const alertas = [];
+  if(inv && pico > inv.kw*1000) alertas.push(`Com todas as cargas ligadas juntas (${fmtInt(pico)} W) passa da potência do inversor (${fmtKw(inv.kw)} kW). Escolha um inversor maior ou tire cargas do backup.`);
+  else if(inv && partida > inv.kw*1000*1.5) alertas.push(`A partida dos motores pode chegar a ${fmtInt(partida)} W. Confira a capacidade de pico do ${inv.modelo} no datasheet.`);
+  if(corrente > n*BAT.iDescarga) alertas.push(`A corrente na bateria (${fmtInt(corrente)} A) passa do limite de ${n*BAT.iDescarga} A. Aumente o número de baterias.`);
+  if(inv && kwp > inv.kw*1.5) alertas.push(`Os módulos (${fmtKw(kwp)} kWp) passam de 1,5× a potência do inversor. Confira a potência FV máxima do ${inv.modelo} no datasheet.`);
+  if(cargas.some(c=>/chuveiro/i.test(c.nome))) alertas.push('Chuveiro elétrico gasta muito e derruba a autonomia. O ideal é deixá-lo fora do quadro de backup.');
+  if(parseInt(h.bateriasQtd) && parseInt(h.bateriasQtd) < nAuto) alertas.push(`Com ${n} bateria${n>1?'s':''}, a autonomia fica abaixo das ${T} h desejadas (o cálculo pede ${nAuto}).`);
+  return { T, cargas, pMedia, pico, partida, energia, nAuto, n, capUtil, autonomia, inv, corrente, gerDia, sugerido, alertas,
+    valorBackup: +h.valorBackup || 0 };
+}
+/* aplica no cálculo da proposta (descrição do kit + resumo) */
+function hibridoAplicar(calc, anexarDescricao){
+  const h = calc.hibridoIn;
+  calc.hibrido = h ? hibridoCalc(h, calc.kwp, calc.geracaoMediaMensal) : null;
+  if(!calc.hibrido || !anexarDescricao) return;
+  const hb = calc.hibrido, linhas = [`${hb.n}× Bateria ${BAT.modelo} – LiFePO4 ${String(BAT.tensao).replace('.',',')} V, 16 kWh (15,3 kWh úteis)`];
+  if(hb.inv) linhas.push(`1× Inversor híbrido ${hb.inv.modelo} – ${fmtKw(hb.inv.kw)} kW`);
+  linhas.push('Quadro de cargas essenciais (backup) com proteções');
+  calc.descricao = (calc.descricao ? calc.descricao + '\n' : '') + linhas.join('\n');
+}
+function hibridoRetornoSolar(calc){
+  const hb = calc.hibrido;
+  if(!hb || !(hb.valorBackup > 0) || hb.valorBackup >= calc.investimento) return;
+  const f = computeFin({ ...calc, investimento: calc.investimento - hb.valorBackup }, calc.finInputs, new Date(calc.dataEmissao || Date.now()));
+  hb.paybackSolar = f ? f.payback : null;
+}
+
+/* ---------- etapa 3: cartão "Tipo de sistema" ---------- */
+function hibKwpAtual(){
+  const v = (id)=>{ const e = document.getElementById(id); return e ? parseFloat(e.value) : NaN; };
+  if(WIZ.kitCustom){ const p = v('wiz-custom-pot'); return p>0 ? p : (+WIZ.customPotencia||0); }
+  const p = v('wiz-kit-potencia'); if(p>0) return p;
+  const sel = document.getElementById('wiz-kit'); const kit = STATE.kits.find(k=>k.id===(sel ? sel.value : WIZ.kitId));
+  return kit ? +kit.potenciaKwp : 0;
+}
+function hibGerMesAtual(kwp){
+  const sel = document.getElementById('wiz-cidade'), irr = STATE.irradiation.find(r=>r.id===(sel ? sel.value : WIZ.cidadeIrrId));
+  const prEl = document.getElementById('wiz-pr'), pr = prEl ? (parseFloat(prEl.value)||0.78) : (WIZ.performanceRatio||0.78);
+  return irr ? kwp*irr.hsp*30.42*pr : 0;
+}
+function hibResumoHtml(){
+  const h = WIZ.hibrido; if(!h || !h.ativo) return '';
+  const kwp = hibKwpAtual(), hb = hibridoCalc(h, kwp, hibGerMesAtual(kwp));
+  if(!hb.cargas.length) return `<div class="help">Adicione as cargas que devem continuar ligadas quando a energia cair.</div>`;
+  return `<div class="hib-res">
+      <div><b>${fmt1(hb.energia)} kWh</b><span>energia para ${hb.T} h de falta</span></div>
+      <div><b>${hb.n} bateria${hb.n>1?'s':''}</b><span>${parseInt(h.bateriasQtd) ? 'definido por você' : 'calculado'} · ${fmt1(hb.capUtil)} kWh úteis</span></div>
+      <div><b>${fmt1(hb.autonomia)} h</b><span>autonomia estimada</span></div>
+      <div><b>${fmtInt(hb.pico)} W</b><span>todas ligadas juntas</span></div>
+    </div>
+    ${hb.sugerido ? `<div class="help">Inversor mínimo para estas cargas: <b>${esc(hb.sugerido.modelo)}</b> (${fmtKw(hb.sugerido.kw)} kW, ${esc(hb.sugerido.fase)}).${hb.gerDia ? ` Um dia médio de sol gera cerca de ${fmt1(hb.gerDia)} kWh para recarregar as baterias.` : ''}</div>` : ''}
+    ${hb.alertas.map(a=>`<div class="hib-alerta">⚠️ ${esc(a)}</div>`).join('')}`;
+}
+function hibridoCardHtml(){
+  const h = WIZ.hibrido, on = !!(h && h.ativo);
+  const linhas = on ? (h.cargas||[]).map((c,i)=>`<tr>
+      <td><input value="${esc(c.nome)}" aria-label="Equipamento" oninput="hibCarga(${i},'nome',this.value)"></td>
+      <td><input type="number" min="0" value="${c.qtd}" aria-label="Quantidade" oninput="hibCarga(${i},'qtd',this.value)"></td>
+      <td><input type="number" min="0" value="${c.w}" aria-label="Potência em watts" oninput="hibCarga(${i},'w',this.value)"></td>
+      <td><input type="number" min="0" max="100" value="${c.uso}" aria-label="Uso durante a falta em porcentagem" oninput="hibCarga(${i},'uso',this.value)"></td>
+      <td class="c"><input type="checkbox" ${c.motor?'checked':''} aria-label="Tem motor (partida forte)" onchange="hibCarga(${i},'motor',this.checked)"></td>
+      <td class="c"><button type="button" class="btn btn-danger btn-sm" onclick="hibRemover(${i})" aria-label="Remover">×</button></td>
+    </tr>`).join('') : '';
+  return `<div class="card" id="wiz-hib-card">
+    <h2>Tipo de sistema</h2>
+    <div class="radio-group">
+      <div class="radio-opt ${!on?'selected':''}" onclick="setHibrido(false)">On-grid (sem bateria)</div>
+      <div class="radio-opt ${on?'selected':''}" onclick="setHibrido(true)">Híbrido com bateria (backup)</div>
+    </div>
+    ${on ? `
+    <div class="sub">Bateria: <b>${BAT.modelo}</b> · LiFePO4 · 51,2 V · 16 kWh (15,3 kWh úteis) · 6.000 ciclos · garantia ${BAT.garantia}.</div>
+    <div class="row">
+      <div class="field" style="flex:2"><label for="hib-inv">Inversor híbrido *</label>
+        <select id="hib-inv" onchange="hibCampo('inversorId',this.value,true)">
+          <option value="">Selecione...</option>
+          ${HIB_INVERSORES.map(i=>`<option value="${i.id}" ${h.inversorId===i.id?'selected':''}>${esc(i.modelo)} — ${fmtKw(i.kw)} kW (${esc(i.fase)})</option>`).join('')}
+          <option value="outro" ${h.inversorId==='outro'?'selected':''}>Outro modelo...</option>
+        </select></div>
+      <div class="field"><label for="hib-aut">Autonomia desejada</label>
+        <select id="hib-aut" onchange="hibCampo('autonomiaH',this.value)">
+          ${[2,4,6,8,12,24].map(v=>`<option value="${v}" ${+h.autonomiaH===v?'selected':''}>${v} horas</option>`).join('')}
+        </select></div>
+    </div>
+    ${h.inversorId==='outro' ? `<div class="row">
+      <div class="field" style="flex:2"><label for="hib-omod">Modelo do inversor</label><input id="hib-omod" value="${esc(h.outroModelo||'')}" oninput="hibCampo('outroModelo',this.value)"></div>
+      <div class="field"><label for="hib-okw">Potência (kW) *</label><input id="hib-okw" type="number" step="0.1" min="0" value="${h.outroKw||''}" oninput="hibCampo('outroKw',this.value)"></div>
+    </div>` : ''}
+    <div class="ss-lbl" style="font-weight:700;margin:12px 0 6px">Cargas essenciais (ficam ligadas quando a energia cai)</div>
+    <div class="hib-tab-wrap"><table class="hib-tab">
+      <tr><th>Equipamento</th><th>Qtd.</th><th>Potência (W)</th><th>Uso na falta (%)</th><th class="c">Motor</th><th></th></tr>
+      ${linhas}
+    </table></div>
+    <div class="row" style="gap:8px;margin-top:8px;align-items:center">
+      <select aria-label="Adicionar equipamento" onchange="if(this.value!==''){hibAdicionar(+this.value);this.value='';}">
+        <option value="">+ Adicionar equipamento...</option>
+        ${HIB_CARGAS.map((c,i)=>`<option value="${i}">${esc(c.nome)} (${c.w} W)</option>`).join('')}
+        <option value="-1">Outro equipamento</option>
+      </select>
+    </div>
+    <div class="help">"Uso na falta" é quanto do tempo o equipamento fica ligado. Ex.: geladeira 40% (o motor liga e desliga), roteador 100%. Marque "Motor" para equipamentos com partida forte.</div>
+    <div id="wiz-hib-resumo">${hibResumoHtml()}</div>
+    <div class="row">
+      <div class="field"><label for="hib-nbat">Quantidade de baterias</label><input id="hib-nbat" type="number" min="1" max="48" placeholder="automático" value="${h.bateriasQtd||''}" oninput="hibCampo('bateriasQtd',this.value)"></div>
+      <div class="field"><label for="hib-valor">Valor total do sistema híbrido (R$) *</label><input id="hib-valor" type="number" step="0.01" min="0" value="${h.valorTotal||''}" oninput="hibCampo('valorTotal',this.value)"></div>
+      <div class="field"><label for="hib-vbk">Desse valor, parte do backup (R$)</label><input id="hib-vbk" type="number" step="0.01" min="0" placeholder="opcional" value="${h.valorBackup||''}" oninput="hibCampo('valorBackup',this.value)"></div>
+    </div>
+    <div class="help">O valor total substitui o valor do kit acima e já deve incluir módulos, inversor híbrido, baterias e instalação. A parte do backup (opcional) serve para mostrar na proposta também o retorno só da parte solar.</div>
+    ` : ''}
+  </div>`;
+}
+function hibAtualizarResumo(){ const el = document.getElementById('wiz-hib-resumo'); if(el) el.innerHTML = hibResumoHtml(); }
+function hibAtualizarCard(){ const el = document.getElementById('wiz-hib-card'); if(el) el.outerHTML = hibridoCardHtml(); }
+window.setHibrido = (on)=>{
+  WIZ.hibrido = WIZ.hibrido || hibPadrao();
+  WIZ.hibrido.ativo = !!on;
+  hibAtualizarCard();
+};
+window.hibCampo = (campo, valor, refazer)=>{
+  if(!WIZ.hibrido) return;
+  WIZ.hibrido[campo] = valor;
+  if(refazer) hibAtualizarCard(); else hibAtualizarResumo();
+};
+window.hibCarga = (i, campo, valor)=>{
+  const c = WIZ.hibrido && WIZ.hibrido.cargas[i]; if(!c) return;
+  c[campo] = (campo==='nome' || campo==='motor') ? valor : (valor===''?'':+valor);
+  hibAtualizarResumo();
+};
+window.hibAdicionar = (i)=>{
+  const base = i>=0 ? HIB_CARGAS[i] : { nome:'', w:0, uso:50, motor:false };
+  WIZ.hibrido.cargas.push({ ...base, qtd:1 });
+  hibAtualizarCard();
+};
+window.hibRemover = (i)=>{ WIZ.hibrido.cargas.splice(i,1); hibAtualizarCard(); };
+/* resumo da proposta (texto curto para a lista/preview) */
+function hibridoValidar(){
+  const h = WIZ.hibrido;
+  if(!h || !h.ativo) return true;
+  if(!h.inversorId){ toast('Escolha o inversor híbrido.'); return false; }
+  if(!hibridoInversor(h)){ toast('Informe a potência do inversor híbrido.'); return false; }
+  if(!(h.cargas||[]).some(c=>+c.qtd>0 && +c.w>0)){ toast('Adicione pelo menos uma carga essencial para o backup.'); return false; }
+  if(!(+h.valorTotal>0)){ toast('Informe o valor total do sistema híbrido.'); return false; }
+  const inv = hibridoInversor(h), ce = WIZ.contratoEquip;
+  if(!ce.inversoresModeloTexto){ ce.inversoresModeloTexto = inv.modelo; ce.inversoresPotenciaKw = inv.kw; ce.inversoresQtd = ce.inversoresQtd || 1; ce.inversoresTipo = 'string'; }
+  return true;
+}
+
 function pdfFrame(numero, page, kicker, title, sub, body){
   const S = propSettings();
   const rod = ['SUPERSUNN Energia Solar', S.cnpj?('CNPJ '+S.cnpj):'', S.site].filter(Boolean).map(esc).join('  •  ');
@@ -6128,7 +6375,8 @@ function pdfPagesHtml(calc, pagamento){
   const linhasEq = (calc.descricao||'').split('\n').map(s=>s.trim()).filter(Boolean);
   const resumoEq = [];
   if(modQtd || ce.modulosModelo) resumoEq.push(['Módulos fotovoltaicos', ce.modulosModelo||dash, modQtd||dash, `${S.garantiaModProduto} / ${S.garantiaModPerformance} anos*`]);
-  if(invQtd || ce.inversoresModeloTexto) resumoEq.push([ce.inversoresTipo==='micro'?'Microinversor':'Inversor', [ce.inversoresModeloTexto, ce.inversoresPotenciaKw?(ce.inversoresPotenciaKw+' kW'):''].filter(Boolean).join(' – ')||dash, invQtd||dash, `${S.garantiaInversor} anos`]);
+  if(invQtd || ce.inversoresModeloTexto) resumoEq.push([calc.hibrido ? 'Inversor híbrido' : ce.inversoresTipo==='micro'?'Microinversor':'Inversor', [ce.inversoresModeloTexto, ce.inversoresPotenciaKw?(ce.inversoresPotenciaKw+' kW'):''].filter(Boolean).join(' – ')||dash, invQtd||dash, `${S.garantiaInversor} anos`]);
+  if(calc.hibrido) resumoEq.push(['Bateria (backup)', `${BAT.modelo} – LiFePO4 51,2 V · 16 kWh`, String(calc.hibrido.n), BAT.garantia.replace(' (10 anos opcional)','')]);
   const servicos = (S.servicos||'').split('\n').map(s=>s.trim()).filter(Boolean);
   const fsz = linhasEq.length > 10 ? 10.5 : 12;
   const sistema = pdfFrame(numero, 5, '04 &nbsp;•&nbsp; SISTEMA PROPOSTO', 'Equipamentos e serviços inclusos', `${esc(calc.nomeKit||'Sistema fotovoltaico')} — ${calc.kwp.toFixed(2).replace('.',',')} kWp`, `
@@ -6149,6 +6397,28 @@ function pdfPagesHtml(calc, pagamento){
         .map(([v,l])=>`<div><div class="sv">${v}</div><div class="sl">${l}</div></div>`).join('')}
     </div>
     <div class="ss-note">Imagem ilustrativa, em escala, feita sobre imagem de satélite (© Google). A posição final dos módulos é definida no projeto executivo, após a visita técnica.</div>`) : '';
+
+  /* 5c. BACKUP COM BATERIAS */
+  const hb = calc.hibrido;
+  const backupPg = (hb && hb.cargas.length) ? pdfFrame(numero, 0, '04 &nbsp;•&nbsp; SISTEMA PROPOSTO', 'Energia mesmo quando a rede cai',
+    `Sistema híbrido com ${hb.n} bateria${hb.n>1?'s':''} de 16 kWh${hb.inv ? ' e inversor ' + esc(hb.inv.modelo) : ''}`, `
+    <div class="ss-stats4">
+      ${[[fmt1(hb.autonomia)+' h','autonomia estimada*'],[fmt1(hb.capUtil)+' kWh','energia armazenada (útil)'],[hb.n+'×','bateria'+(hb.n>1?'s':'')+' de 16 kWh'],[hb.inv?fmtKw(hb.inv.kw)+' kW':'–','inversor híbrido']]
+        .map(([v,l])=>`<div><div class="sv">${v}</div><div class="sl">${l}</div></div>`).join('')}
+    </div>
+    <div class="ss-label">O QUE FICA LIGADO QUANDO A ENERGIA CAI</div>
+    <table class="ss-table eq"><tr><th>Equipamento</th><th class="c">Qtd.</th><th class="c">Potência</th><th class="c">Uso na falta</th></tr>
+      ${hb.cargas.map(c=>`<tr><td class="k">${esc(c.nome)}</td><td class="c">${c.qtd}</td><td class="c">${fmtInt(c.w)} W</td><td class="c">${c.uso}%</td></tr>`).join('')}
+    </table>
+    <div class="ss-label">COMO FUNCIONA</div>
+    <div class="ss-checks">${[
+      'Quando a energia da rede cai, o inversor híbrido desliga a casa da rede e passa a alimentar esses equipamentos pelas baterias, de forma automática.',
+      `Durante o dia, os módulos solares abastecem a casa e recarregam as baterias${hb.gerDia ? ` (um dia médio de sol gera cerca de ${fmt1(hb.gerDia)} kWh)` : ''}.`,
+      'Baterias de lítio-ferro-fosfato (LiFePO4): seguras, sem manutenção e com vida útil de 6.000 ciclos.',
+      `Garantia das baterias: ${BAT.garantia}.`
+    ].map(s=>`<div>${pdfCircle('check','#22C55E',22)}<span>${esc(s)}</span></div>`).join('')}</div>
+    ${hb.paybackSolar ? `<div class="ss-note" style="font-size:12px;color:#0B1F4B"><b>Retorno da parte solar (sem o backup): ${fmtAnosMeses(hb.paybackSolar)}.</b> O retorno da página seguinte considera o valor total, com as baterias.</div>` : ''}
+    <div class="ss-note">* Estimativa para os equipamentos e o tempo de uso acima, com as baterias carregadas no início da falta. A autonomia real varia com o uso. Equipamentos de alto consumo (chuveiro elétrico, forno, ar-condicionado) reduzem bastante a autonomia.</div>`) : '';
 
   /* 6. RETORNO */
   const retorno = fin ? pdfFrame(numero, 6, '05 &nbsp;•&nbsp; RETORNO DO INVESTIMENTO', 'Um investimento que se paga', null, `
@@ -6239,7 +6509,7 @@ function pdfPagesHtml(calc, pagamento){
     <img class="ss-cover-swoosh" src="${swooshCoverImg()}">
   </div>`;
 
-  const paginas = [capa, resumo, quem, consumo, sistema, telhadoPg, retorno, invest, etapasPg, garantias, fechamento].filter(Boolean);
+  const paginas = [capa, resumo, quem, consumo, sistema, telhadoPg, backupPg, retorno, invest, etapasPg, garantias, fechamento].filter(Boolean);
   return paginas.map((h,i)=>h.replace(/<div class="ss-pg">\d+<\/div>/, `<div class="ss-pg">${i+1}</div>`)).join('');
 }
 
